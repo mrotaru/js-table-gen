@@ -84,7 +84,7 @@ $( document ).ready(function() {
     }
 
     var data = window.statsCompareData;
-    console.log(data);
+    console.log('data: ', data);
 
     if(!data.length >= 1) {
         return;
@@ -92,8 +92,6 @@ $( document ).ready(function() {
 
     // array: each item is a string or another array (nested props)
     var props = buildProps(data);
-//    var props = getOwnProps(data[0]);
-    console.log(props);
 
     var $table = $('<table class="table"></table>');
 
@@ -152,16 +150,23 @@ $( document ).ready(function() {
 
     $table.append($thead);
 
-    // each item
     var $tbody = $('<tbody></tbody>');
-    for(var i=0; i< data.length; ++i){
+    // each item
+    _(data).each(function(item){
         $tr = $('<tr></tr>');
-        for(var j=0; j < props.length; ++j){
-            var propName = props[j];
-            $tr.append( '<td>' + data[i][propName] + '</td>' );
-        }
+        // each property
+        _(props).each(function(prop){
+            if(typeof(prop) === 'string'){
+                $tr.append( '<td>' + item[prop] + '</td>' );
+            } else {
+                var mPropName = Object.keys(prop)[0];
+                _(prop[mPropName]).each(function(nestedProp){
+                    $tr.append( '<td>' + item[mPropName][nestedProp] + '</td>' );
+                });
+            }
+        });
         $tbody.append($tr);
-    }
+    });
     $table.append($tbody);
 
     // insert table into dom
