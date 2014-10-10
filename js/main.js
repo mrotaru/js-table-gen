@@ -114,7 +114,7 @@ $( document ).ready(function() {
     // is second row needed ? for nested properties
     var needSecondRow = false;
     _(props).each(function(prop){
-        if(typeof(p) === 'object') {
+        if(typeof(prop) === 'object') {
             needSecondRow = true;
         }
     });
@@ -127,9 +127,8 @@ $( document ).ready(function() {
             $tr.append( '<th>' + props[i] + '</th>' );
             $thead.append($tr);
         } else {
-            var propName = Object.keys(props);
-            console.log(props);
-            $tr.append('<th colspan="' + keys.length + '">' + propName + '</th>');
+            var propName = Object.keys(props[i]);
+            $tr.append('<th colspan="' + props[i][propName].length + '">' + propName + '</th>');
             $thead.append($tr);
         }
     }
@@ -140,11 +139,15 @@ $( document ).ready(function() {
         _(props).each(function(prop){
             if(typeof(prop) === 'object') {
                 // sould be an array
-//                $
+                _(prop[Object.keys(prop)[0]]).each(function(nestedProp){
+                    console.log('nestedProp: ', nestedProp);
+                    $tr.append('<th>' + nestedProp + '</th>');
+                });
             } else {
                 $tr.append("<td></td>");
             }
         });
+        $thead.append($tr);
     }
 
     $table.append($thead);
