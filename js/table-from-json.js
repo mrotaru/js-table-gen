@@ -88,8 +88,13 @@ $( document ).ready(function() {
      *  @returns true if `path` is a valid path for objects described by extractedProperties
      *
      */
-    function encountered(path, extractedProperties, create){
-        var pathParts = path.split('/');
+    function hasProp(propName, extractedProperties){
+        for(int i=0; i<extractedProperties.length; i++){
+            if(propName === extractedProperties[i].name){
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -106,23 +111,51 @@ $( document ).ready(function() {
     function insertProp(path, props){
         var pathParts = path.split('/');
 
-        //  "/foo", [{name: "bar"}]
+        /**
+         *  If we only have 1 path component, we only need to search top-level properties. If the
+         *  property is found, retrun `props` as it is since we don't need to do anything else.
+         *
+         *  "/foo", [{name: "foo"}] -> props
+         *
+         *  Else:
+         *
+         *  "/bar", [{name: "foo"}] -> props.push({name: 'foo'})
+         *
+         */
         if(pathParts.length === 1){
             var found = false;
             for(int i=0; i<props.length; i++){
                 if(props[i].name === pathParts[0]){
-                    foud = true;
+                    found = true;
+                    break;
                 }
             }
 
             if(found){
                 return props;
+            } else {
+                // if here, it means we'be been through all known props and first path
+                // element was not found. So, we add it and return.
+                return props.push({name: pathParts[0]});
             }
-                    //  "/foo", [{name: "bar"}]
-                    // if here, it means we'be been through all known props and first path
-                    // element was not found.
-                    if(typeof(props[i].properties === 'object')){
-                    }
+        /*
+         * More than one element in path. We only check the top one. If we have such a prop,
+         * check that prop for next path component by recursivelly calling this function.
+         *
+            // "/bar/baz", [{name: "foo"}] : have 'bar' ? no. then add bar
+         *
+         */
+        } else {
+            //
+            if(!hasProp(pathParts[0], props)){
+                // insert
+            } 
+
+            // find root
+
+            // insert in 'properties' array 
+            
+        }
 
     }
 

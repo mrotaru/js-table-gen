@@ -1,4 +1,4 @@
-[
+window.statsCompareData = [
     {
         "name": "Fighting Pick",
         "faction": "Rhodock",
