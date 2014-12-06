@@ -1,0 +1,29 @@
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Mocha Tests</title>
+  <link rel="stylesheet" href="mocha.css" />
+</head>
+<body>
+  <div id="mocha"></div>
+    <script src="lib/mocha.js"></script>
+    <script src="lib/chai.js"></script>
+    <script src="lib/sinon.js"></script>
+    <!-- Your application code -->
+<!--    <script src="../js/table-from-json.js"></script>-->
+    <!-- Configure mocha and chai -->
+    <script>
+    mocha.setup({
+        ui: 'bdd',
+        globals: ['$', 'jQuery*']
+    })
+    assert = chai.assert
+    </script>
+    <!-- Load your tests -->
+    <script src="tests.js"></script>
+    <!-- Run those tests! -->
+    <script>
+        mocha.run();
+    </script> 
+</body>
+</html>
