@@ -1,3 +1,8 @@
+var testTableGenerator;
+before(function(){
+    testTableGenerator = new TableGenerator();
+});
+
 describe("TableGenerator.search()", function() {
 
     var items = [
@@ -17,12 +22,6 @@ describe("TableGenerator.search()", function() {
             }
         }
     ]
-
-    var testTableGenerator;
-
-    before(function(){
-        testTableGenerator = new TableGenerator();
-    });
 
     /**
      * Note that this functino does not check for  a regular property.
@@ -60,10 +59,74 @@ describe("TableGenerator.search()", function() {
             'foo/bar/noo'
         )).to.be.null;
     }); 
-    it("should return return prop value if exists and is an object (1 level deep)", function() {
+    it("should return prop value if exists and is an object (1 level deep)", function() {
         expect(testTableGenerator.search(
             {foo: {bar: 'baz'}},
             'foo'
         )).to.deep.equal({bar: 'baz'});
     }); 
+});
+
+describe("TableGenerator.hasXProp()", function() {
+
+    it("should return true if xprop list has property (1 level deep)", function() {
+        expect(testTableGenerator.hasXProp(
+            [ {name: 'foo'} ],
+            'foo'
+        )).to.be.true;
+    });
+    it("should return false if xprop list doesn't have property (1 level deep)", function() {
+        expect(testTableGenerator.hasXProp(
+            [ {name: 'foo'} ],
+            'bar'
+        )).to.be.false;
+    });
+    it("should return true if xprop list has property (2 levels deep)", function() {
+        expect(testTableGenerator.hasXProp(
+            [
+                {
+                    name: 'foo', properties: [
+                        {name: 'bar'}
+                    ]
+                }
+            ],
+            'foo/bar'
+        )).to.be.true;
+    });
+    it("should return true if xprop list has property (3 levels deep)", function() {
+        expect(testTableGenerator.hasXProp(
+            [
+                {
+                    name: 'foo', properties: [
+                        {
+                            name: 'bar', properties: [
+                                {
+                                    name: 'baz'
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            'foo/bar/baz'
+        )).to.be.true;
+    });
+    it("should return false if xprop list doesn't have property (3 levels deep)", function() {
+        expect(testTableGenerator.hasXProp(
+            [
+                {
+                    name: 'foo', properties: [
+                        {
+                            name: 'bar', properties: [
+                                {
+                                    name: 'baz'
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ],
+            'foo/bar/noo'
+        )).to.be.false;
+    });
 });

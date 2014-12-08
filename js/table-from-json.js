@@ -1,22 +1,6 @@
 (function() {
     var root = this;
 
-    //    props:
-    //     [
-    //         {name: "name"},
-    //         {name: "a",
-    //             properties: [{
-    //                 name: "p1",
-    //                 properties: [
-    //                     {name: "sp1"},
-    //                     {name: "sp2"}
-    //                 ]
-    //             }]
-    //         } 
-    //     ]
-
-    //    getProp(items[0])
-
     var TableGenerator = function(){
     }
 
@@ -51,29 +35,52 @@
 
 
     /**
-     * Similar to `value`, it takes a `path` and object as input. But the object
-     * is of a special kind:
+     * Similar to `search`, it takes a `path` and object as input.
+     * But the object is an array, each element being an object with:
+     *  - `name` {string} name of the property (mandatory)
+     *  - `properties` {array} nested properties (optional)
+     *
+     * An example illustrates much better:
      *
      *  extractedproperties = [ 
      *      {name: "foo"},
      *      {name: "bar", properties: [ {name: "p1"} ]
      *  ]
      *
-     *  "/foo"          -> true
-     *  "/foo/p1"       -> false
-     *  "/bar"          -> true
-     *  "/bar/p1"       -> true
+     *  hasXProp(xprops, "/foo")          -> true
+     *  hasXProp(xprops, "/foo/p1")       -> false
+     *  hasXProp(xprops, "/bar")          -> true
+     *  hasXProp(xprops, "/bar/p1")       -> true
      *
-     *  @returns true if `path` is a valid path for objects described by extractedProperties
+     *  @returns true if `path` is already in `xprops`
      *
      */
-    TableGenerator.prototype.hasProp = function(propName, extractedProperties){
-        for(var i=0; i<extractedProperties.length; i++){
-            if(propName === extractedProperties[i].name){
-                return true;
+    TableGenerator.prototype.hasXProp = function(xprops, path){
+        var self = this;
+
+        var pathComponents = path.split('/');
+        var firstPathComponent = pathComponents[0];
+        var beforeLastPathComponent  = pathComponents[pathComponents.length-1];
+
+        var found = false;
+
+        for (var i=0; i < xprops.length; ++i) {
+            if(xprops[i].name === firstPathComponent){
+                if(pathComponents.length === 1) {
+                    return true;
+                } else {
+                    if(!xprops[i].hasOwnProperty("properties")){
+                        return false;
+                    } else {
+                        pathComponents.splice(0,1);
+                        var newPath = pathComponents.join('/');
+                        return self.hasXProp(xprops[i].properties, newPath);
+                    }
+                }
             }
         }
-        return false;
+        
+        return found;
     }
 
     /**
