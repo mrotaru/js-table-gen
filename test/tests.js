@@ -130,3 +130,29 @@ describe("TableGenerator.hasXProp()", function() {
         )).to.be.false;
     });
 });
+
+describe("TableGenerator.addXProp()", function() {
+
+    it("should add xprop (1 level deep)", function() {
+        expect(testTableGenerator.addXProp(
+            [],
+            'foo'
+        )).to.be.deep.equal([{name: 'foo'}]);
+    });
+    it("should add xprop (2 level deep)", function() {
+        expect(testTableGenerator.addXProp(
+            [{name: 'foo'}],
+            'foo/bar'
+        )).to.be.deep.equal(
+            [{name: 'foo', properties: [{name: 'bar'}] }]
+        );
+    });
+    it("should add xprop (2 level deep, existing sub-properties)", function() {
+        expect(testTableGenerator.addXProp(
+            [{name: 'foo', properties: [{name: 'bar'}] }],
+            'foo/baz'
+        )).to.be.deep.equal(
+            [{name: 'foo', properties: [{name: 'bar'},{name: 'baz'}] }]
+        );
+    });
+});

@@ -83,6 +83,40 @@
         return found;
     }
 
+
+    TableGenerator.prototype.addXProp = function(xprops, path){
+        var self = this;
+
+        var pathComponents = path.split('/');
+        var firstPathComponent = pathComponents[0];
+        var beforeLastPathComponent  = pathComponents[pathComponents.length-1];
+
+        var found = false;
+
+        for (var i=0; i < xprops.length; ++i) {
+            if(xprops[i].name === firstPathComponent){
+                if(pathComponents.length > 1) {
+                    if(!xprops[i].hasOwnProperty("properties")){
+                        xprops[i].properties = [];
+                    }
+                    if(!self.hasXProp(xprops[i], pathComponents[1])) {
+                        xprops[i].properties.push({name: pathComponents[1]});
+                    }
+                }
+            }
+        }
+
+        if(!found) {
+            if(pathComponents.length === 1) {
+                xprops.push({name: firstPathComponent });
+            } else {
+                return {};
+            }
+        }
+
+        return xprops;
+    }
+
     /**
      *
      *  extractedproperties = [ 
