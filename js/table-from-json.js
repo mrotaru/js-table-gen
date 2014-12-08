@@ -1,72 +1,51 @@
-$( document ).ready(function() {
+(function() {
+    var root = this;
 
-    //      | a       | 
-    //      +---------+
-    //      | p1      |
-    //      +---------+
-    //      |sp1 |sp2 |
-    //  ----+---------+
-    //  foo | 100|    |
-    //  ----+---------+
-    //  bar |    | 200|
-    //  ----+---------+
-    var items = [
-        {
-            "name": "foo",
-            "a": {
-                "p1": {
-                    "sp1": 100
-                }
-            }
-        },{
-            "name": "bar",
-            "a": {
-                "p1": {
-                    "sp2": 200
-                }
-            }
-        }
-    ]
+    //    props:
+    //     [
+    //         {name: "name"},
+    //         {name: "a",
+    //             properties: [{
+    //                 name: "p1",
+    //                 properties: [
+    //                     {name: "sp1"},
+    //                     {name: "sp2"}
+    //                 ]
+    //             }]
+    //         } 
+    //     ]
 
-//    props:
-//     [
-//         {name: "name"},
-//         {name: "a",
-//             properties: [{
-//                 name: "p1",
-//                 properties: [
-//                     {name: "sp1"},
-//                     {name: "sp2"}
-//                 ]
-//             }]
-//         } 
-//     ]
+    //    getProp(items[0])
 
-    getProp(items[0])
-    
-    var props;
+    var TableGenerator = function(){
+    }
 
     /**
-     * Examples:
-     *  search(items[0], "a/p1") === {...} (an object)
-     *  search(items[0], "a/p1/sp1") === 100
-     *  search(items[0], "a/p1/sp2") === null
-     *  search(items[1], "a/p1/sp2") === 200
-     *  search(items[0], "a/nosuch") === null
+     * Return value at `path` in `obj`.
+     *
+     * Example:
+     * 
+     * search({foo: 'bar'}, 'foo') returns 'bar'
+     * search({foo: 'bar'}, 'nope') returns null
+     * search({foo: {bar: 'baz'}}, 'foo/bar') returns 'baz'
      */
-    function search(obj,path){
-        var pathParts = path.split('/');
+    TableGenerator.prototype.search = function(obj,path){
+        var self = this;
 
-        if(pathParts.length === 1){
-            if(obj.hasOwnProperty(pathParts[0])) {
-                return obj[pathParts[0]];
+        var pathComponents = path.split('/');
+        var firstPathComponent = pathComponents[0];
+        var lastPathComponent  = pathComponents[pathComponents.length-1];
+
+        if(obj.hasOwnProperty(firstPathComponent)) {
+            if(pathComponents.length === 1){
+                return obj[firstPathComponent];
             } else {
-                return null;
+                pathComponents.splice(0,1);
+                var newPath = pathComponents.join('/');
+                return self.search(obj[firstPathComponent], newPath);
             }
-        }
-
-        if(obj.hasOwnProperty(pathParts[0])) {
-            return search(obj[pathParts[0]],pathParts.splice(0,1));
+        } else {
+            return null;
         }
     }
 
@@ -88,8 +67,8 @@ $( document ).ready(function() {
      *  @returns true if `path` is a valid path for objects described by extractedProperties
      *
      */
-    function hasProp(propName, extractedProperties){
-        for(int i=0; i<extractedProperties.length; i++){
+    TableGenerator.prototype.hasProp = function(propName, extractedProperties){
+        for(var i=0; i<extractedProperties.length; i++){
             if(propName === extractedProperties[i].name){
                 return true;
             }
@@ -108,7 +87,7 @@ $( document ).ready(function() {
      *  "/foo/bar/baz" -> {name: "foo", propertie: [{name: "bar", properties: [{name: "baz"}]}]
      *
      */
-    function insertProp(path, props){
+    TableGenerator.prototype.insertProp = function(path, props){
         var pathParts = path.split('/');
 
         /**
@@ -124,7 +103,7 @@ $( document ).ready(function() {
          */
         if(pathParts.length === 1){
             var found = false;
-            for(int i=0; i<props.length; i++){
+            for(var i=0; i<props.length; i++){
                 if(props[i].name === pathParts[0]){
                     found = true;
                     break;
@@ -138,13 +117,13 @@ $( document ).ready(function() {
                 // element was not found. So, we add it and return.
                 return props.push({name: pathParts[0]});
             }
-        /*
-         * More than one element in path. We only check the top one. If we have such a prop,
-         * check that prop for next path component by recursivelly calling this function.
-         *
+            /*
+             * More than one element in path. We only check the top one. If we have such a prop,
+             * check that prop for next path component by recursivelly calling this function.
+             *
             // "/bar/baz", [{name: "foo"}] : have 'bar' ? no. then add bar
-         *
-         */
+             *
+             */
         } else {
             //
             if(!hasProp(pathParts[0], props)){
@@ -154,7 +133,7 @@ $( document ).ready(function() {
             // find root
 
             // insert in 'properties' array 
-            
+
         }
 
     }
@@ -179,7 +158,7 @@ $( document ).ready(function() {
      *
      *
      */
-    function extractProperties(item, prefix, props){
+    TableGenerator.prototype.extractProperties = function(item, prefix, props){
 
         var props = [];
         prefix = prefix || '';
@@ -201,11 +180,12 @@ $( document ).ready(function() {
             }
         }
     }
-    
-    function makeTable(json){
-        for(int i=0; i<json.length; i++){
+
+    TableGenerator.prototype.makeTable = function(json){
+        for(var i=0; i<json.length; i++){
             console.log();
         }
     }
 
-});
+    root.TableGenerator = TableGenerator;
+}).call(this);
