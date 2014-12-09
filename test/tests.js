@@ -175,3 +175,47 @@ describe("TableGenerator.addXProp()", function() {
         );
     });
 });
+
+describe("TableGenerator.extractXProps()", function() {
+    it("should return empty array from empty object", function() {
+        expect(testTableGenerator.extractProperties(
+            {}
+        )).to.deep.equal([]);
+    });
+    it("should extract xprops (1 level deep)", function() {
+        expect(testTableGenerator.extractProperties(
+            {foo: 'bar'}
+        )).to.deep.equal([{name: 'foo'}]);
+    });
+    it("should extract xprops (2 levels deep)", function() {
+        expect(testTableGenerator.extractProperties(
+            {foo: { bar: 'baz'}}
+        )).to.deep.equal([
+            {name: 'foo', properties: [{
+                name: 'bar'}]
+            }
+        ]);
+    });
+    it("should extract xprops (2 levels deep, siblings)", function() {
+        expect(testTableGenerator.extractProperties(
+            {foo: { bar: 'asd', baz: 'asd'}}
+        )).to.deep.equal([
+            {name: 'foo', properties: [
+                {name: 'bar'},
+                {name: 'baz'}
+            ]}
+        ]);
+    });
+    it("should extract xprops (3 levels deep, siblings with nested props)", function() {
+        expect(testTableGenerator.extractProperties(
+            {foo: { bar: 'asd', baz: { boo: 22 }}}
+        )).to.deep.equal([
+            {name: 'foo', properties: [
+                {name: 'bar'},
+                {name: 'baz', properties: [
+                    {name: 'boo'}
+                ]}
+            ]}
+        ]);
+    });
+});

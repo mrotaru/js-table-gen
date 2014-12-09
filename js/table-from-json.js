@@ -145,27 +145,22 @@
      *
      *
      */
-    TableGenerator.prototype.extractProperties = function(item, prefix, props){
+    TableGenerator.prototype.extractProperties = function(item, xprops, path){
+        var self = this;
 
-        var props = [];
-        prefix = prefix || '';
+        var xprops = xprops || [];
 
         // each property
         for (var prop in item) {
             if (item.hasOwnProperty(prop)) {
-                var path = prefix + '/' + prop;
-                console.log(path);
-
-                // add to 'props'
-                if(!encountered(path, props)){
-                    if(typeof(item[prop] === 'object')){
-                        props 
-                    } else {
-                        addSimpleProp(path);
-                    }
+                if(typeof item[prop] === 'object'){
+                    xprops.push({name: prop, properties: self.extractProperties(item[prop])});
+                } else {
+                    xprops = self.addXProp(xprops, prop);
                 }
             }
         }
+        return xprops;
     }
 
     TableGenerator.prototype.makeTable = function(json){
