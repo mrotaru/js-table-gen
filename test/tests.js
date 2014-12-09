@@ -133,7 +133,7 @@ describe("TableGenerator.hasXProp()", function() {
 
 describe("TableGenerator.addXProp()", function() {
 
-    it("should add xprop (1 level deep)", function() {
+    it("should add xprop (1 level deep, no existing sub-properties)", function() {
         expect(testTableGenerator.addXProp(
             [],
             'foo'
@@ -153,6 +153,25 @@ describe("TableGenerator.addXProp()", function() {
             'foo/baz'
         )).to.be.deep.equal(
             [{name: 'foo', properties: [{name: 'bar'},{name: 'baz'}] }]
+        );
+    });
+    it("should add xprop (2 level deep, no existing sub-properties)", function() {
+        expect(testTableGenerator.addXProp(
+            [],
+            'foo/bar'
+        )).to.be.deep.equal(
+            [{name: 'foo', properties: [{name: 'bar'}] }]
+        );
+    });
+    it("should add xprop (3 level deep, no existing sub-properties)", function() {
+        expect(testTableGenerator.addXProp(
+            [],
+            'foo/bar/baz'
+        )).to.be.deep.equal(
+            [{name: 'foo', properties:
+                [{name: 'bar', properties:
+                    [{name: 'baz'}]}]
+            }]
         );
     });
 });

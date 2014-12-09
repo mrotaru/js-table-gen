@@ -99,18 +99,24 @@
                     if(!xprops[i].hasOwnProperty("properties")){
                         xprops[i].properties = [];
                     }
-                    if(!self.hasXProp(xprops[i], pathComponents[1])) {
+                    if(!self.hasXProp(xprops[i].properties, pathComponents[1])) {
                         xprops[i].properties.push({name: pathComponents[1]});
                     }
                 }
+                found = true;
             }
         }
 
         if(!found) {
+            xprops.push({name: firstPathComponent });
             if(pathComponents.length === 1) {
-                xprops.push({name: firstPathComponent });
+                return xprops;
             } else {
-                return {};
+                var xprop = xprops[xprops.length-1];
+                xprop.properties = [];
+                pathComponents.splice(0,1);
+                var newPath = pathComponents.join('/');
+                xprop.properties = self.addXProp(xprop.properties, newPath);
             }
         }
 
