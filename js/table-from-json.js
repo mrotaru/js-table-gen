@@ -60,7 +60,6 @@
 
         var pathComponents = path.split('/');
         var firstPathComponent = pathComponents[0];
-        var beforeLastPathComponent  = pathComponents[pathComponents.length-1];
 
         var found = false;
 
@@ -84,12 +83,16 @@
     }
 
 
+    /**
+     * See test/tests.js for examples
+     *
+     * @returns {Array} of new x-properties
+     */
     TableGenerator.prototype.addXProp = function(xprops, path){
         var self = this;
 
         var pathComponents = path.split('/');
         var firstPathComponent = pathComponents[0];
-        var beforeLastPathComponent  = pathComponents[pathComponents.length-1];
 
         var found = false;
 
@@ -122,69 +125,6 @@
 
         return xprops;
     }
-
-    /**
-     *
-     *  extractedproperties = [ 
-     *      {name: "foo"},
-     *  ]
-     *  
-     *  "/bar" -> {name: "bar"}
-     *  "/foo/bar" -> {name: "foo", propertie: [{name: "bar"}]
-     *  "/foo/bar/baz" -> {name: "foo", propertie: [{name: "bar", properties: [{name: "baz"}]}]
-     *
-     */
-    TableGenerator.prototype.insertProp = function(path, props){
-        var pathParts = path.split('/');
-
-        /**
-         *  If we only have 1 path component, we only need to search top-level properties. If the
-         *  property is found, retrun `props` as it is since we don't need to do anything else.
-         *
-         *  "/foo", [{name: "foo"}] -> props
-         *
-         *  Else:
-         *
-         *  "/bar", [{name: "foo"}] -> props.push({name: 'foo'})
-         *
-         */
-        if(pathParts.length === 1){
-            var found = false;
-            for(var i=0; i<props.length; i++){
-                if(props[i].name === pathParts[0]){
-                    found = true;
-                    break;
-                }
-            }
-
-            if(found){
-                return props;
-            } else {
-                // if here, it means we'be been through all known props and first path
-                // element was not found. So, we add it and return.
-                return props.push({name: pathParts[0]});
-            }
-            /*
-             * More than one element in path. We only check the top one. If we have such a prop,
-             * check that prop for next path component by recursivelly calling this function.
-             *
-            // "/bar/baz", [{name: "foo"}] : have 'bar' ? no. then add bar
-             *
-             */
-        } else {
-            //
-            if(!hasProp(pathParts[0], props)){
-                // insert
-            } 
-
-            // find root
-
-            // insert in 'properties' array 
-
-        }
-
-    }
-
 
     /**
      * Extract properties into `props`. So, `props` is an array, each element
