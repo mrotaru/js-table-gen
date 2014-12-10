@@ -140,6 +140,32 @@
      *
      */
     TableGenerator.prototype.combineXProps = function(xprops1, xprops2){
+        var self = this;
+        console.log(xprops1, xprops2);
+        var res = xprops1;
+        var i=0;
+        for (i=0; i < xprops2.length; ++i) {
+            var found = false;
+            for (var j=0; j < xprops1.length; ++j) {
+                //console.log('comparing ', xprops2[i].name, 'with', xprops1[j].name);
+                if(xprops2[i].name === xprops1[j].name) {
+                    if(xprops2[i].hasOwnProperty(properties)){
+                        // we need to combine them
+                        if(xprops1[j].hasOwnProperty(properties)){
+                            xprops1[j].properties = self.combineXProps(xprop2[i].properties, xprops1[j].properties);
+                        } else {
+                        }
+                    }
+                    found = true;
+                }
+            }
+
+            if(i == xprops1.length-1 && !found){
+                // traversed all xprops1 elements, but this prop was not found
+                res.push(xprops2[i])
+            }
+        }
+        return res;
     }
 
     /**

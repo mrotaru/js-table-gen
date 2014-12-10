@@ -183,7 +183,7 @@ describe("TableGenerator.combineXProps()", function() {
             [{name: 'bar'}]
         )).to.deep.equal(
             [
-                [{name: 'foo'}], [{name: 'bar'}]
+                {name: 'foo'}, {name: 'bar'}
             ]
         );
     });
