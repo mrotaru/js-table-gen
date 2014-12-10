@@ -176,6 +176,40 @@ describe("TableGenerator.addXProp()", function() {
     });
 });
 
+describe("TableGenerator.combineXProps()", function() {
+    it("should combine 2 xprops on same level", function() {
+        expect(testTableGenerator.combineXProps(
+            [{name: 'foo'}],
+            [{name: 'bar'}]
+        )).to.deep.equal(
+            [
+                [{name: 'foo'}], [{name: 'bar'}]
+            ]
+        );
+    });
+
+    it("should combine nested xprops, 1 level difference", function() {
+        expect(testTableGenerator.combineXProps(
+            [{name: 'foo'}],
+            [{name: 'foo', properties: [{name: 'bar'}] }]
+        )).to.deep.equal(
+            [
+                {name: 'foo', properties: [{name: 'bar'}] }
+            ]
+        );
+    });
+    it("should combine nested xprops, 1 level difference, siblings", function() {
+        expect(testTableGenerator.combineXProps(
+            [{name: 'foo', properties: [{name: 'bar'}] }],
+            [{name: 'foo', properties: [{name: 'baz'}] }]
+        )).to.deep.equal(
+            [
+                {name: 'foo', properties: [{name: 'bar'}, {name: 'baz'}] }
+            ]
+        );
+    });
+});
+
 describe("TableGenerator.extractXProps()", function() {
     it("should return empty array from empty object", function() {
         expect(testTableGenerator.extractProperties(
@@ -217,5 +251,34 @@ describe("TableGenerator.extractXProps()", function() {
                 ]}
             ]}
         ]);
+    });
+    it("should be able to add xprops to existing xprops", function() {
+        var res = testTableGenerator.extractProperties(
+            {foo: { baz: 'asd'}},
+            [{name: 'foo', properties: [{name: 'bar'}] }]
+        );
+        var expectedRes = [{name: 'foo', properties: [
+                {name: 'bar'},
+                {name: 'baz'}
+            ]}];
+//        console.dir(res);
+//        console.dir(expectedRes);
+        expect(res).to.deep.equal(expectedRes);
+    });
+    it("should be able to add xprops to existing xprops (3 levels deep)", function() {
+        var res = testTableGenerator.extractProperties(
+            {foo: { bar: { baz: 'asd'}}},
+            [{name: 'foo', properties: [{name: 'bar'}] }]
+        );
+        var expectedRes = [{
+                name: 'foo', properties: [
+                    {name: 'bar', properties: [{name: 'baz'}]}
+                ]
+            }]
+        console.log('result: ');
+        console.dir(res);
+        console.log('expected: ');
+        console.dir(expectedRes);
+        expect(res).to.deep.equal(expectedRes);
     });
 });

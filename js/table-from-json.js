@@ -125,6 +125,22 @@
 
         return xprops;
     }
+    
+    /**
+     * Combine two xprops arrays
+     *
+     * In:  [{name: 'foo'}], [{name: 'bar'}]
+     * Out: [{name: 'foo'}], [{name: 'bar'}]
+     *
+     * In:  [{name: 'foo'}], [{name: 'foo', properties: [{name: 'bar'}] }]
+     * Out: [{name: 'foo', properties: [{name: 'bar'}] }]
+     *
+     * In:  [{name: 'foo', properties: [{name: 'bar'}] }], [{name: 'foo', properties: [{name: 'baz'}] }]
+     * Out: [{name: 'foo', properties: [{name: 'bar'}, {name: 'baz'}] }]
+     *
+     */
+    TableGenerator.prototype.combineXProps = function(xprops1, xprops2){
+    }
 
     /**
      * Extract properties into `props`. So, `props` is an array, each element
@@ -151,12 +167,36 @@
         var xprops = xprops || [];
 
         // each property
-        for (var prop in item) {
-            if (item.hasOwnProperty(prop)) {
-                if(typeof item[prop] === 'object'){
-                    xprops.push({name: prop, properties: self.extractProperties(item[prop])});
-                } else {
-                    xprops = self.addXProp(xprops, prop);
+        for (var iprop in item) {
+            if (item.hasOwnProperty(iprop)) {
+                if(typeof item[iprop] === 'object'){
+                    if(!self.hasXProp(xprops, iprop)) {
+                        // iprop is not in xprops
+                        var ex = self.extractProperties(item[iprop]);
+                        xprops.push({name: iprop, properties: ex, noiprop: true});
+                    } else {
+
+                        // iprop is already in xprops
+                        // ex: ( {foo: {bar: 2}}, [{name: 'foo', properties: [{name: 'baz'}] }] )
+                        // so, we need to add 'bar' to xprops[0].properties
+
+                        // 1. find xprop it in the array
+                        for (var i=0; i < xprops.length; ++i) {
+                            if(xprops[i].name === iprop) {
+
+                                // 2. make sure it has a `properties` array
+                                if(!xprops[i].hasOwnProperty('properties')){
+                                    xprops[i].properties = [];
+                                }
+
+                                // 3. recursivelly add to xprops
+                                var ex = self.extractProperties(item[iprop]);
+                                xprops[i].properties = self.combineXProps(xprops[i].properties,ex);
+                            }
+                        }
+                    }
+                } else { // simple iprop
+                    xprops = self.addXProp(xprops, iprop);
                 }
             }
         }
