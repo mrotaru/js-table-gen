@@ -197,45 +197,61 @@
      *
      *
      */
-    TableGenerator.prototype.extractProperties = function(item, xprops, path){
+    TableGenerator.prototype.extractXProps = function(item, xprops, path){
+        console.log('extracting from: ',item);
         var self = this;
 
-        var xprops = xprops || [];
+        var xprops = xprops ? xprops.slice(0) : [];
 
-        // each property
+        // each own property
         for (var iprop in item) {
             if (item.hasOwnProperty(iprop)) {
-                if(typeof item[iprop] === 'object'){
-                    if(!self.hasXProp(xprops, iprop)) {
-                        // iprop is not in xprops
-                        var ex = self.extractProperties(item[iprop]);
-                        xprops.push({name: iprop, properties: ex, noiprop: true});
-                    } else {
 
-                        // iprop is already in xprops
-                        // ex: ( {foo: {bar: 2}}, [{name: 'foo', properties: [{name: 'baz'}] }] )
-                        // so, we need to add 'bar' to xprops[0].properties
+                // check if we already have this xprop in xprops
+                var existing = null;
+                for (var i=0; i < xprops.length; ++i) {
+                    if(xprops[i].name === iprop) {
+                        existing = xprops[i];
+                        break;
+                    }
+                }
 
-                        // 1. find xprop it in the array
-                        for (var i=0; i < xprops.length; ++i) {
-                            if(xprops[i].name === iprop) {
+                // if we have it in xprops
+                if(existing) {
 
-                                // 2. make sure it has a `properties` array
-                                if(!xprops[i].hasOwnProperty('properties')){
-                                    xprops[i].properties = [];
-                                }
+                    // if iprop is complex (an object), we need to recurse.
+                    // Otherwise, for simple props, since it exists already, we don't need
+                    // to do anything.
+                    if(typeof item[iprop] === 'object'){
 
-                                // 3. recursivelly add to xprops
-                                var ex = self.extractProperties(item[iprop]);
-                                xprops[i].properties = self.combineXProps(xprops[i].properties,ex);
+                        // recurse, sending existing.properties as second parameter, if existing has it
+                        var extracted = self.extractXProps(item[iprop], existing.hasOwnProperty('properties') ? existing.properties : []);
+
+                        // since we'll be extracting properties from an object, we make
+                        // sure our xprop has a 'properties' property.
+                        if(extracted.length > 0) {
+                            if(!existing.hasOwnProperty('properties')){
+                                existing.properties = extracted;
+                            } else {
+                                // combine with existing xprops
+                                existing.properties = self.combineXProps(existing.properties, extracted);
                             }
                         }
                     }
-                } else { // simple iprop
-                    xprops = self.addXProp(xprops, iprop);
+                } else { // we don't have it
+                    if(typeof item[iprop] === 'object'){
+                        var extracted = self.extractXProps(item[iprop]);
+                        if(extracted.length > 0) {
+                            console.log('pushing new xprop: ', extracted);
+                            xprops.push({name: iprop, properties: extracted});
+                        }
+                    } else {
+                        xprops.push({name: iprop});
+                    }
                 }
             }
         }
+        console.log('returning:',xprops);
         return xprops;
     }
 
