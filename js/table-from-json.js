@@ -198,7 +198,6 @@
      *
      */
     TableGenerator.prototype.extractXProps = function(item, xprops, path){
-        console.log('extracting from: ',item);
         var self = this;
 
         var xprops = xprops ? xprops.slice(0) : [];
@@ -242,7 +241,6 @@
                     if(typeof item[iprop] === 'object'){
                         var extracted = self.extractXProps(item[iprop]);
                         if(extracted.length > 0) {
-                            console.log('pushing new xprop: ', extracted);
                             xprops.push({name: iprop, properties: extracted});
                         }
                     } else {
@@ -251,7 +249,6 @@
                 }
             }
         }
-        console.log('returning:',xprops);
         return xprops;
     }
 
