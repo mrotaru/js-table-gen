@@ -141,31 +141,41 @@
      */
     TableGenerator.prototype.combineXProps = function(xprops1, xprops2){
         var self = this;
-        console.log(xprops1, xprops2);
-        var res = xprops1;
-        var i=0;
-        for (i=0; i < xprops2.length; ++i) {
-            var found = false;
+        var ret = xprops1.slice(0);
+
+        for (var i=0; i < xprops2.length; ++i) {
+            var src = xprops2[i];
+
             for (var j=0; j < xprops1.length; ++j) {
-                //console.log('comparing ', xprops2[i].name, 'with', xprops1[j].name);
-                if(xprops2[i].name === xprops1[j].name) {
-                    if(xprops2[i].hasOwnProperty(properties)){
-                        // we need to combine them
-                        if(xprops1[j].hasOwnProperty(properties)){
-                            xprops1[j].properties = self.combineXProps(xprop2[i].properties, xprops1[j].properties);
-                        } else {
-                        }
-                    }
+                dst = xprops1[j];
+
+                var found = false;
+
+                if(src.name === dst.name) {
+
                     found = true;
+
+                    // if no nested xprops
+                    if(!src.hasOwnProperty('properties')){
+                        // we don't need to do anything more for this xprop
+                        break;
+                    } else {
+                        // if dst has no 'properties', simply copy it from src
+                        if(!dst.hasOwnProperty('properties')){
+                            dst.properties = src.properties;
+                        } else {
+                            dst.properties = self.combineXProps(dst.properties, src.properties);
+                        }
+                        break;
+                    }
+                }
+                if(j == xprops1.length-1 && !found){
+                    // traversed all ret elements, but this prop was not found
+                    ret.push(src)
                 }
             }
-
-            if(i == xprops1.length-1 && !found){
-                // traversed all xprops1 elements, but this prop was not found
-                res.push(xprops2[i])
-            }
         }
-        return res;
+        return ret;
     }
 
     /**
