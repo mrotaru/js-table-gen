@@ -252,6 +252,35 @@
         return xprops;
     }
 
+    /**
+     * Calculate total number of "leaves" of the xprop tree. This is needed to
+     * know the number of columns a table header should span.
+     *
+     * In: {name: 'foo'} 
+     * Out: 1
+     *
+     * In: {name: 'foo', properties: [{name: 'bar'}] } 
+     * Out: 1
+     *
+     * In: {name: 'foo', properties: [{name: 'bar'}, {name: 'baz'}] } 
+     * Out: 2
+     *
+     * More examples in test suite
+     */
+    TableGenerator.prototype.getNrOfEdgeProps = function(xprop){
+        var self = this;
+
+        if(!xprop.hasOwnProperty('properties')){
+            return 1;
+        } else {
+            var subProps = 0;
+            for (var i=0; i < xprop.properties.length; ++i) {
+                subProps += self.getNrOfEdgeProps(xprop.properties[i]);
+            }
+            return subProps;
+        }
+    }
+
     TableGenerator.prototype.makeTable = function(json){
         for(var i=0; i<json.length; i++){
             console.log();

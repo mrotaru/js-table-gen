@@ -261,8 +261,6 @@ describe("TableGenerator.extractXProps()", function() {
                 {name: 'bar'},
                 {name: 'baz'}
             ]}];
-//        console.dir(res);
-//        console.dir(expectedRes);
         expect(res).to.deep.equal(expectedRes);
     });
     it("should be able to add xprops to existing xprops (3 levels deep)", function() {
@@ -275,10 +273,38 @@ describe("TableGenerator.extractXProps()", function() {
                     {name: 'bar', properties: [{name: 'baz'}]}
                 ]
             }]
-        console.log('result: ');
-        console.dir(res);
-        console.log('expected: ');
-        console.dir(expectedRes);
         expect(res).to.deep.equal(expectedRes);
+    });
+});
+
+describe("TableGenerator.getNrOfEdgeProps()", function() {
+    it("should return 1 if a single property", function() {
+        expect(testTableGenerator.getNrOfEdgeProps({name: 'foo'})).to.equal(1);
+    });
+    it("should return 1 if a single property, with another nested property", function() {
+        expect(testTableGenerator.getNrOfEdgeProps(
+            {name: 'foo', properties: [{name: 'bar'}] }
+        )).to.equal(1);
+    });
+    it("should return 2 if a property has 2 nested properties", function() {
+        expect(testTableGenerator.getNrOfEdgeProps(
+            {name: 'foo', properties: [{name: 'bar'},{name: 'baz'}] }
+        )).to.equal(2);
+    });
+    it("should return 3 if a property has 2 nested properties, and one of them has 2 nested props", function() {
+        expect(testTableGenerator.getNrOfEdgeProps(
+            {
+                name: 'foo', properties: [
+                    {
+                        name: 'bar'
+                    },{
+                        name: 'baz', properties: [
+                            {name: 'bez'},
+                            {name: 'boz'}
+                        ]
+                    }
+                ]
+            }
+        )).to.equal(3);
     });
 });
