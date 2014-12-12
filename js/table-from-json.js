@@ -267,7 +267,7 @@
      *
      * More examples in test suite
      */
-    TableGenerator.prototype.getNrOfEdgeProps = function(xprop){
+    TableGenerator.prototype.getSpan = function(xprop){
         var self = this;
 
         if(!xprop.hasOwnProperty('properties')){
@@ -275,10 +275,75 @@
         } else {
             var subProps = 0;
             for (var i=0; i < xprop.properties.length; ++i) {
-                subProps += self.getNrOfEdgeProps(xprop.properties[i]);
+                subProps += self.getSpan(xprop.properties[i]);
             }
             return subProps;
         }
+    }
+
+    /**
+     * Go through all xprops and place them on the appropriate level.
+     *
+     * Generate a bi-dimensional array.
+     *
+     * First dimension being the level - 0 for top level xprops, 1 for one level
+     * below, and so on. The number of elements will, therefore, be equal to the
+     * "depth" of the xprop tree.
+     *
+     * Second dimension, represens the elements themselves. The results from this
+     * function are intended for use in generating a multi-level table header, so
+     * each element must be an object with two properties: `name` and `span`.
+     *
+     * Since the sums of `span`s for each level must be equal, sometimes properties
+     * with the name set to null will be used.
+     *
+     * Algorythm
+     * ---------
+     *
+     * 1. Build first level, ret[0]
+     * For each xprop, simply push it to `ret[0]`, without `properties`, and with a
+     * `span` determined by calling `getSpan(xprop)`.
+     *
+     * 2. Traverse again from the beginning.
+     * If xprop doesn't have nested xprops, simply add an xprop with `name` = null
+     * and a `span` of 1.
+     * 
+     * If xprop has `properties`, for each of them calculate span, and add it.
+     *
+     * Repeat. When all the elemens on a level has a null `name`, that level is
+     * deleted, and `ret` is reuturned.
+     *
+     * @example
+     * this([ {name: 'foo'} ]) // =>
+     * [ [ {name: 'foo', span: 1} ] ] 
+     *
+     * this([ {name: 'foo', properties: [{name: 'bar'}, {name: 'baz'}] } ]) // =>
+     * [ 
+     *   [ {name: 'foo', span: 2} ], // level 0
+     *   [ {name: 'bar', span: 1}, {name: 'baz', span: 1} ] // level 1
+     * ]
+     *   
+     * this([
+     *     {name: 'foo', properties: [{name: 'bar'}, {name: 'baz'}] },
+     *     {name: 'dob', properties: [{name: 'dab'}, {name: 'deb'}] }
+     * ]) =>
+     * 
+     */
+    TableGenerator.prototype.layerXProps(xprops, level){
+        var ret = [];
+        var done = false;
+        var nextXProps = xprops;
+        while(!done) {
+            var xprops = nextXProps;
+            for (var i=0; i < xprops.length; ++i) {
+                if(xprops[i].hasOwnProperty('properties')){
+                    nextXProps = nextXProps.concat(xprops[i].properties);
+                } else {
+                }
+            }
+        }
+
+        return ret;
     }
 
     TableGenerator.prototype.makeTable = function(json){
