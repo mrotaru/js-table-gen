@@ -333,13 +333,38 @@ describe("TableGenerator.layerXProps()", function() {
 //        console.log(expectedRes);
         expect(res).to.deep.equal(expectedRes);
     });
-    /*
-     *
-     * this() // =>
-     *   
-     * this([
-     *     {name: 'foo', properties: [{name: 'bar'}, {name: 'baz'}] },
-     *     {name: 'dob', properties: [{name: 'dab'}, {name: 'deb'}] }
-     * ]) =>
-     */
+    it("should work with sub-properties, 3 levels", function() {
+        var res = testTableGenerator.layerXProps(
+            [
+                {
+                    name: '1A', properties: [
+                        {
+                            name: '2A1', properties: [
+                                {name: '3A1'},
+                                {name: '3A2'}
+                            ]
+                        },{
+                            name: '2A2'
+                        }
+                    ]
+                },{
+                    name: '1B'
+                },{
+                    name: '1C', properties: [
+                        {name: '2C'}
+                    ]
+                }
+
+            ]
+        );
+        var expectedRes =
+            [ 
+                [ {name: '1A',  span: 3}, {name: '1B',  span: 1}, {name: '1C', span: 1} ], // level 0
+                [ {name: '2A1', span: 2}, {name: '2A2', span: 1}, {name: undefined, span: 1}, {name: '2C', span: 1} ], // level 1
+                [ {name: '3A1', span: 1}, {name: '3A2', span: 1}, {name: undefined, span: 1}, {name: undefined, span: 1},{name: undefined, span: 1} ] // level 3
+            ]
+        console.log(res);
+        console.log(expectedRes);
+        expect(res).to.deep.equal(expectedRes);
+    });
 });
