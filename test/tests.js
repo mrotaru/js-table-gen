@@ -308,3 +308,38 @@ describe("TableGenerator.getNrOfEdgeProps()", function() {
         )).to.equal(3);
     });
 });
+
+describe("TableGenerator.layerXProps()", function() {
+    it("should work for basic case", function() {
+        var res = testTableGenerator.layerXProps(
+            [ {name: 'foo'} ]
+        );
+        var expectedRes =
+            [ [ {name: 'foo', span: 1} ] ] 
+//        console.log(res);
+//        console.log(expectedRes);
+        expect(res).to.deep.equal(expectedRes);
+    });
+    it("should work with sub-properties", function() {
+        var res = testTableGenerator.layerXProps(
+            [ {name: 'foo', properties: [{name: 'bar'}, {name: 'baz'}] } ]
+        );
+        var expectedRes =
+            [ 
+                [ {name: 'foo', span: 2} ], // level 0
+                [ {name: 'bar', span: 1}, {name: 'baz', span: 1} ] // level 1
+            ]
+//        console.log(res);
+//        console.log(expectedRes);
+        expect(res).to.deep.equal(expectedRes);
+    });
+    /*
+     *
+     * this() // =>
+     *   
+     * this([
+     *     {name: 'foo', properties: [{name: 'bar'}, {name: 'baz'}] },
+     *     {name: 'dob', properties: [{name: 'dab'}, {name: 'deb'}] }
+     * ]) =>
+     */
+});
