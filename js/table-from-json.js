@@ -313,41 +313,8 @@
      *
      * Second dimension, represens the elements themselves. The results from this
      * function are intended for use in generating a multi-level table header, so
-     * each element must be an object with two properties: `name` and `span`.
-     *
-     * Since the sums of `span`s for each level must be equal, sometimes properties
-     * with the name set to null will be used.
-     *
-     * Algorythm
-     * ---------
-     *
-     * 1. Build first level, ret[0]
-     * For each xprop, simply push it to `ret[0]`, without `properties`, and with a
-     * `span` determined by calling `getSpan(xprop)`.
-     *
-     * 2. Traverse again from the beginning.
-     * If xprop doesn't have nested xprops, simply add an xprop with `name` = null
-     * and a `span` of 1.
-     * 
-     * If xprop has `properties`, for each of them calculate span, and add it.
-     *
-     * Repeat. When all the elemens on a level has a null `name`, that level is
-     * deleted, and `ret` is reuturned.
-     *
-     * @example
-     * this([ {name: 'foo'} ]) // =>
-     * [ [ {name: 'foo', span: 1} ] ] 
-     *
-     * this([ {name: 'foo', properties: [{name: 'bar'}, {name: 'baz'}] } ]) // =>
-     * [ 
-     *   [ {name: 'foo', span: 2} ], // level 0
-     *   [ {name: 'bar', span: 1}, {name: 'baz', span: 1} ] // level 1
-     * ]
-     *   
-     * this([
-     *     {name: 'foo', properties: [{name: 'bar'}, {name: 'baz'}] },
-     *     {name: 'dob', properties: [{name: 'dab'}, {name: 'deb'}] }
-     * ]) =>
+     * each element must be an object with one mandatory property: `name` and can
+     * also have a `span` and `depth` (colspan and rowspan).
      * 
      */
     TableGenerator.prototype.layerXProps = function(xprops){
