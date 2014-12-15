@@ -354,20 +354,41 @@
         var self = this;
         var ret = [];
 
+        // compute maximum depth - the number of layers, or rows
+        var depth = 0;
+        for (var i=0; i < xprops.length; ++i) {
+           var _depth = self.getDepth(xprops[i]);
+           if(_depth > depth) {
+               depth = _depth;
+           }
+        }
+
         function layerXProp(xprop, level){
 
             if(ret[level] === undefined){
                 ret.push([]);
             }
 
-            ret[level].push({name: xprop.name, span: self.getSpan(xprop)});
-
             if(xprop.hasOwnProperty('properties')){
+
+                ret[level].push({name: xprop.name, span: self.getSpan(xprop)});
+
                 for (var i=0; i < xprop.properties.length; ++i) {
                     layerXProp(xprop.properties[i], level+1);
                 }
-            } else if(xprop.name){
-                layerXProp({span: 1}, level+1);
+            } else {
+
+                var item = {span: 1};
+                if(xprop.name){
+                    item.name = xprop.name;
+                }
+
+                var _depth = depth-level;
+                if(_depth !== 1){
+                    item.depth = _depth;
+                }
+
+                ret[level].push(item);
             }
         }
 
@@ -375,23 +396,6 @@
             layerXProp(xprops[i],0);
         }
         
-        // check last level. If it only contains properties without names,
-        // remove it.
-        var remove = true;
-        var levels = ret.length;
-        for (var i=0; i < levels-1; ++i) {
-            if(ret[i].hasOwnProperty('name')){
-                remove = false;
-                break;
-            }
-        }
-
-        if(remove) {
-            console.log('removing');
-            console.log('before: ',ret);
-            ret.splice(-1,1);
-        }
-
         return ret;
     }
 

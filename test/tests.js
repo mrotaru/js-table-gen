@@ -358,9 +358,9 @@ describe("TableGenerator.layerXProps()", function() {
     });
     it("should work with sub-properties, 3 levels", function() {
         /*  
-         *      1A     1B     1C
-         *       |            |
-         *      2A1          2C
+         *        1A      1B     1C
+         *       |   \           |
+         *      2A1  2A2        2C
          *     /   \
          *   3A1  3A2
          */
@@ -390,8 +390,8 @@ describe("TableGenerator.layerXProps()", function() {
         var expectedRes =
             [ 
                 [ {name: '1A',  span: 3}, {name: '1B',  span: 1, depth: 3}, {name: '1C', span: 1} ], // level 0
-                [ {name: '2A1', span: 2}, {name: '2A2', span: 1}, {name: '2C', span: 1, depth: 2} ], // level 1
-                [ {name: '3A1', span: 1}, {name: '3A2', span: 1}, {name: undefined, span: 1}, {name: undefined, span: 1},{name: undefined, span: 1} ] // level 3
+                [ {name: '2A1', span: 2}, {name: '2A2', span: 1, depth: 2}, {name: '2C', span: 1, depth: 2} ], // level 1
+                [ {name: '3A1', span: 1}, {name: '3A2', span: 1} ] // level 3
             ]
         console.log(res);
         console.log(expectedRes);
