@@ -277,22 +277,45 @@ describe("TableGenerator.extractXProps()", function() {
     });
 });
 
-describe("TableGenerator.getNrOfEdgeProps()", function() {
+describe("TableGenerator.getDepth()", function() {
+    it("should return 1 for a prop without nested props", function() {
+        expect(testTableGenerator.getDepth({name: 'foo'})).to.equal(1);
+    });
+    it("should return 2 for a prop with one nested prop", function() {
+        expect(testTableGenerator.getDepth(
+            {name: 'foo', properties: [{name: 'bar'}] }
+        )).to.equal(2);
+    });
+    it("should return 3 for a prop with one nested prop", function() {
+        expect(testTableGenerator.getDepth(
+            {name: 'foo', properties: [{name: 'bar', properties: [{name: 'baz'}] }] }
+        )).to.equal(3);
+    });
+    it("should return 4 for a prop with one nested prop (siblings)", function() {
+        expect(testTableGenerator.getDepth(
+            {name: 'foo', properties: [{name: 'bar', properties: [{name: 'baz'}] },
+                                       {name: 'bez', properties: [{name: 'boz', properties: [{name: 'biz'}] }] }
+        ]}
+        )).to.equal(4);
+    });
+});
+
+describe("TableGenerator.getSpan()", function() {
     it("should return 1 if a single property", function() {
-        expect(testTableGenerator.getNrOfEdgeProps({name: 'foo'})).to.equal(1);
+        expect(testTableGenerator.getSpan({name: 'foo'})).to.equal(1);
     });
     it("should return 1 if a single property, with another nested property", function() {
-        expect(testTableGenerator.getNrOfEdgeProps(
+        expect(testTableGenerator.getSpan(
             {name: 'foo', properties: [{name: 'bar'}] }
         )).to.equal(1);
     });
     it("should return 2 if a property has 2 nested properties", function() {
-        expect(testTableGenerator.getNrOfEdgeProps(
+        expect(testTableGenerator.getSpan(
             {name: 'foo', properties: [{name: 'bar'},{name: 'baz'}] }
         )).to.equal(2);
     });
     it("should return 3 if a property has 2 nested properties, and one of them has 2 nested props", function() {
-        expect(testTableGenerator.getNrOfEdgeProps(
+        expect(testTableGenerator.getSpan(
             {
                 name: 'foo', properties: [
                     {
@@ -334,6 +357,13 @@ describe("TableGenerator.layerXProps()", function() {
         expect(res).to.deep.equal(expectedRes);
     });
     it("should work with sub-properties, 3 levels", function() {
+        /*  
+         *      1A     1B     1C
+         *       |            |
+         *      2A1          2C
+         *     /   \
+         *   3A1  3A2
+         */
         var res = testTableGenerator.layerXProps(
             [
                 {
@@ -359,8 +389,8 @@ describe("TableGenerator.layerXProps()", function() {
         );
         var expectedRes =
             [ 
-                [ {name: '1A',  span: 3}, {name: '1B',  span: 1}, {name: '1C', span: 1} ], // level 0
-                [ {name: '2A1', span: 2}, {name: '2A2', span: 1}, {name: undefined, span: 1}, {name: '2C', span: 1} ], // level 1
+                [ {name: '1A',  span: 3}, {name: '1B',  span: 1, depth: 3}, {name: '1C', span: 1} ], // level 0
+                [ {name: '2A1', span: 2}, {name: '2A2', span: 1}, {name: '2C', span: 1, depth: 2} ], // level 1
                 [ {name: '3A1', span: 1}, {name: '3A2', span: 1}, {name: undefined, span: 1}, {name: undefined, span: 1},{name: undefined, span: 1} ] // level 3
             ]
         console.log(res);

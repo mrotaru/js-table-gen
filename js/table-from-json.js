@@ -282,6 +282,27 @@
     }
 
     /**
+     * Calculate the depth of a xprop. That is, how many levels do it's
+     * nested xprops extend.
+     */
+    TableGenerator.prototype.getDepth = function(xprop, currentLevel){
+        var self = this;
+        var currentLevel = currentLevel || 1;
+        if(!xprop.hasOwnProperty('properties')){
+            return currentLevel;
+        } else {
+            var max = 1;
+            for (var i=0; i < xprop.properties.length; ++i) {
+                var depth = self.getDepth(xprop.properties[i], currentLevel+1);
+                if(depth > max){
+                    max = depth;
+                }
+            }
+            return max;
+        }
+    }
+
+    /**
      * Go through all xprops and place them on the appropriate level.
      *
      * Generate a bi-dimensional array.
