@@ -417,10 +417,74 @@
         return ret;
     }
 
-    TableGenerator.prototype.makeTable = function(json){
-        for(var i=0; i<json.length; i++){
-            console.log();
+    // build table header
+    TableGenerator.prototype.buildHeader = function(layeredXProps){
+        var $thead = $('<thead></thead>');
+        for (var i=0; i < layeredXProps.length; ++i) {
+
+            var $tr = $('<tr></tr>');
+            for(var j=0; j < layeredXProps[i].length; ++j){
+                var prop = layeredXProps[i][j];
+                var colspan = prop.hasOwnProperty('span' ) ? prop.span.toString() : "1";
+                var rowspan = prop.hasOwnProperty('depth') ? prop.depth.toString() : "1";
+                var name = prop.name.charAt(0).toUpperCase() + prop.name.slice(1);
+                var str = '<th colspan="' + colspan + '" rowspan="' + rowspan + '">' + name + '</th>';
+                $tr.append(str);
+            }
+
+            $thead.append($tr);
         }
+        return $thead;
+    }
+
+    // build a table row
+    TableGenerator.prototype.buildRow = function(item, xprops){
+        var self = this;
+
+        var $tr = $('<tr></tr>');
+
+        function val(obj, xprop) {
+            if(!xprop.hasOwnProperty('properties')){
+                var propVal = self.search(obj, xprop.path);
+                $tr.append( '<td title="' + xprop.path +'">' + (propVal != null ? propVal : "") + '</td>' );
+            } else {
+                for (var i=0; i < xprop.properties.length; ++i) {
+                    val(obj,xprop.properties[i]);
+                }
+            }
+        }
+
+        for (var i=0; i < xprops.length; ++i) {
+            val(item, xprops[i]);
+        }
+
+        return $tr;
+    }
+
+    TableGenerator.prototype.makeTable = function(data){
+        var self = this;
+
+        if(!data.length >= 1) {
+            return;
+        }
+
+        var xprops = [];
+        for (var i=0; i < data.length; ++i) {
+            xprops = self.extractXProps(data[i],xprops);
+        }
+
+        var layeredXProps = self.layerXProps(xprops);
+        var $table = $('<table class="table"></table>');
+        $table.append(self.buildHeader(layeredXProps));
+
+        var $tbody = $('<tbody></tbody>');
+
+        // each item
+        for (var i=0; i < data.length; ++i) {
+            $tbody.append(self.buildRow(data[i], xprops));
+        }
+        $table.append($tbody);
+        return $table;
     }
 
     root.TableGenerator = TableGenerator;
