@@ -219,61 +219,77 @@ describe("TableGenerator.extractXProps()", function() {
     it("should extract xprops (1 level deep)", function() {
         expect(testTableGenerator.extractXProps(
             {foo: 'bar'}
-        )).to.deep.equal([{name: 'foo'}]);
+        )).to.deep.equal([{name: 'foo', path: '/foo'}]);
     });
     it("should extract xprops (2 levels deep)", function() {
-        expect(testTableGenerator.extractXProps(
+        var result = testTableGenerator.extractXProps(
             {foo: { bar: '123'}}
-        )).to.deep.equal([
-            {name: 'foo', properties: [{
-                name: 'bar'}]
-            }
-        ]);
+        );
+        var expected = [{name: 'foo', path: '/foo', properties: [{
+                name: 'bar', path: '/foo/bar'}]
+        }];
+//        console.log(result);
+//        console.log(expected);
+        expect(result).to.deep.equal(expected);
     });
     it("should extract xprops (2 levels deep, siblings)", function() {
-        expect(testTableGenerator.extractXProps(
+        var result = testTableGenerator.extractXProps(
             {foo: { bar: 'asd', baz: 'asd'}}
-        )).to.deep.equal([
-            {name: 'foo', properties: [
-                {name: 'bar'},
-                {name: 'baz'}
+        );
+        var expected =([
+            {name: 'foo', path: '/foo', properties: [
+                {name: 'bar', path: '/foo/bar'},
+                {name: 'baz', path: '/foo/baz'}
             ]}
         ]);
+//        console.log(result);
+//        console.log(expected);
+        expect(result).to.deep.equal(expected);
     });
     it("should extract xprops (3 levels deep, siblings with nested props)", function() {
-        expect(testTableGenerator.extractXProps(
+        var result = testTableGenerator.extractXProps(
             {foo: { bar: 'asd', baz: { boo: 22 }}}
-        )).to.deep.equal([
-            {name: 'foo', properties: [
-                {name: 'bar'},
-                {name: 'baz', properties: [
-                    {name: 'boo'}
+        );
+        var expected = [
+            {name: 'foo', path: '/foo', properties: [
+                {name: 'bar', path: '/foo/bar'},
+                {name: 'baz', path: '/foo/baz', properties: [
+                    {name: 'boo', path: '/foo/baz/boo'}
                 ]}
             ]}
-        ]);
+        ];
+//        console.log(result);
+//        console.log(expected);
+        expect(result).to.deep.equal(expected);
     });
     it("should be able to add xprops to existing xprops", function() {
-        var res = testTableGenerator.extractXProps(
+        var result = testTableGenerator.extractXProps(
             {foo: { baz: 'asd'}},
-            [{name: 'foo', properties: [{name: 'bar'}] }]
+            [{name: 'foo', path: '/foo', properties: [{name: 'bar', path: '/foo/bar'}] }]
         );
-        var expectedRes = [{name: 'foo', properties: [
-                {name: 'bar'},
-                {name: 'baz'}
+        var expected = [{name: 'foo', path: '/foo', properties: [
+                {name: 'bar', path: '/foo/bar'},
+                {name: 'baz', path: '/foo/baz'}
             ]}];
-        expect(res).to.deep.equal(expectedRes);
+//        console.log(result);
+//        console.log(expected);
+        expect(result).to.deep.equal(expected);
     });
     it("should be able to add xprops to existing xprops (3 levels deep)", function() {
-        var res = testTableGenerator.extractXProps(
+        var result = testTableGenerator.extractXProps(
             {foo: { bar: { baz: 'asd'}}},
-            [{name: 'foo', properties: [{name: 'bar'}] }]
+            [{name: 'foo', path: '/foo', properties: [{name: 'bar', path: '/foo/bar'}] }]
         );
-        var expectedRes = [{
-                name: 'foo', properties: [
-                    {name: 'bar', properties: [{name: 'baz'}]}
+        var expected= [{
+                name: 'foo', path: '/foo', properties: [
+                    {name: 'bar', path: '/foo/bar', properties: [{
+                        name: 'baz', path: '/foo/bar/baz'
+                    }]}
                 ]
             }]
-        expect(res).to.deep.equal(expectedRes);
+//        console.log(result);
+//        console.log(expected);
+        expect(result).to.deep.equal(expected);
     });
 });
 
@@ -335,22 +351,22 @@ describe("TableGenerator.getSpan()", function() {
 describe("TableGenerator.layerXProps()", function() {
     it("should work for basic case", function() {
         var res = testTableGenerator.layerXProps(
-            [ {name: 'foo'} ]
+            [ {name: 'foo', path: '/foo'} ]
         );
         var expectedRes =
-            [ [ {name: 'foo', span: 1} ] ] 
+            [ [ {name: 'foo', path: '/foo',  span: 1} ] ] 
 //        console.log(res);
 //        console.log(expectedRes);
         expect(res).to.deep.equal(expectedRes);
     });
     it("should work with sub-properties", function() {
         var res = testTableGenerator.layerXProps(
-            [ {name: 'foo', properties: [{name: 'bar'}, {name: 'baz'}] } ]
+            [ {name: 'foo', path: '/foo', properties: [{name: 'bar', path: '/foo/bar'}, {name: 'baz', path: '/foo/baz'}] } ]
         );
         var expectedRes =
             [ 
-                [ {name: 'foo', span: 2} ], // level 0
-                [ {name: 'bar', span: 1}, {name: 'baz', span: 1} ] // level 1
+                [ {name: 'foo', path: '/foo', span: 2} ], // level 0
+                [ {name: 'bar', path: '/foo/bar', span: 1}, {name: 'baz', path: '/foo/baz',  span: 1} ] // level 1
             ]
 //        console.log(res);
 //        console.log(expectedRes);
@@ -367,21 +383,21 @@ describe("TableGenerator.layerXProps()", function() {
         var res = testTableGenerator.layerXProps(
             [
                 {
-                    name: '1A', properties: [
+                    name: '1A', path: '/1A', properties: [
                         {
-                            name: '2A1', properties: [
-                                {name: '3A1'},
-                                {name: '3A2'}
+                            name: '2A1', path: '/1A/2A1', properties: [
+                                {name: '3A1', path: '/1A/2A1/3A1'},
+                                {name: '3A2', path: '/1A/2A1/3A2'}
                             ]
                         },{
-                            name: '2A2'
+                            name: '2A2', path: '/1A/2A2'
                         }
                     ]
                 },{
-                    name: '1B'
+                    name: '1B', path: '/1B'
                 },{
-                    name: '1C', properties: [
-                        {name: '2C'}
+                    name: '1C', path: '/1C', properties: [
+                        {name: '2C', path: '/1C/2C'}
                     ]
                 }
 
@@ -389,12 +405,12 @@ describe("TableGenerator.layerXProps()", function() {
         );
         var expectedRes =
             [ 
-                [ {name: '1A',  span: 3}, {name: '1B',  span: 1, depth: 3}, {name: '1C', span: 1} ], // level 0
-                [ {name: '2A1', span: 2}, {name: '2A2', span: 1, depth: 2}, {name: '2C', span: 1, depth: 2} ], // level 1
-                [ {name: '3A1', span: 1}, {name: '3A2', span: 1} ] // level 3
+                [ {name: '1A',  path: '/1A', span: 3}, {name: '1B', path: '/1B',  span: 1, depth: 3}, {name: '1C', path: '/1C', span: 1} ], // level 0
+                [ {name: '2A1', path: '/1A/2A1', span: 2}, {name: '2A2', path: '/1A/2A2', span: 1, depth: 2}, {name: '2C', path: '/1C/2C', span: 1, depth: 2} ], // level 1
+                [ {name: '3A1', path: '/1A/2A1/3A1', span: 1}, {name: '3A2', path: '/1A/2A1/3A2', span: 1} ] // level 3
             ]
-        console.log(res);
-        console.log(expectedRes);
+//        console.log(res);
+//        console.log(expectedRes);
         expect(res).to.deep.equal(expectedRes);
     });
 });

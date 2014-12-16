@@ -47,7 +47,13 @@ $( document ).ready(function() {
 //    _(data).each(function(item){
 //        $tr = $('<tr></tr>');
 //        // each property
-//        _(xprops).each(function(prop){
+//        _(xprops).each(function(xprop){
+//            if(!xprop.hasOwnProperty('properties')){
+
+//            } else {
+
+//            }
+
 //            if(typeof(prop) === 'string'){
 //                $tr.append( '<td>' + item[prop] + '</td>' );
 //            } else {

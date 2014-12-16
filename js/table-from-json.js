@@ -82,6 +82,46 @@
         return found;
     }
 
+    /**
+     * If `obj` matches the structure described by `xprop`, return an array with each
+     * property value extracted (or null, if object doesn't have it) and `path`.
+     */
+    function xpropVals(xprop, obj){
+        var self = this;
+        res = [];
+
+
+        if(!xprop.hasOwnProperty('properties')){
+            res.path = path + '/' + xprop.name;
+            if(obj.hasOwnProperty(xprop.name)){
+                res.value = obj[xprop.name];
+            } else {
+                res.value = null;
+            }
+            return res;
+        } else {
+
+            function xpropsVals(xprops, obj, path) {
+                var path = path || '';
+
+                for (var i=0;i < xprops.length; ++i) {
+                    if(!xprops[i].hasOwnProperty('properties')){
+                        if(obj.hasOwnProperty(xprop.name)){
+                            res.value = obj[xprop.name];
+                        } else {
+                            res.value = null;
+                        }
+                        return res;
+                    }
+                }
+                if(!found){
+                    return null;
+                }
+            }
+            xpropsVals(xprop.properties, obj);
+        }
+    }
+
 
     /**
      * See test/tests.js for examples
@@ -201,6 +241,7 @@
         var self = this;
 
         var xprops = xprops ? xprops.slice(0) : [];
+        var path = path || '';
 
         // each own property
         for (var iprop in item) {
@@ -224,7 +265,11 @@
                     if(typeof item[iprop] === 'object'){
 
                         // recurse, sending existing.properties as second parameter, if existing has it
-                        var extracted = self.extractXProps(item[iprop], existing.hasOwnProperty('properties') ? existing.properties : []);
+                        var extracted = self.extractXProps(
+                            item[iprop],
+                            existing.hasOwnProperty('properties') ? existing.properties : [],
+                            path + '/' + iprop
+                        );
 
                         // since we'll be extracting properties from an object, we make
                         // sure our xprop has a 'properties' property.
@@ -239,12 +284,12 @@
                     }
                 } else { // we don't have it
                     if(typeof item[iprop] === 'object'){
-                        var extracted = self.extractXProps(item[iprop]);
+                        var extracted = self.extractXProps(item[iprop], null, path + '/' + iprop);
                         if(extracted.length > 0) {
-                            xprops.push({name: iprop, properties: extracted});
+                            xprops.push({name: iprop, path: path + '/' + iprop, properties: extracted});
                         }
                     } else {
-                        xprops.push({name: iprop});
+                        xprops.push({name: iprop, path: path + '/' + iprop});
                     }
                 }
             }
@@ -338,17 +383,20 @@
 
             if(xprop.hasOwnProperty('properties')){
 
-                ret[level].push({name: xprop.name, span: self.getSpan(xprop)});
+                ret[level].push({name: xprop.name, path: xprop.path, span: self.getSpan(xprop)});
 
                 for (var i=0; i < xprop.properties.length; ++i) {
                     layerXProp(xprop.properties[i], level+1);
                 }
             } else {
 
-                var item = {span: 1};
+                var item = {};
                 if(xprop.name){
                     item.name = xprop.name;
                 }
+
+                item.path = xprop.path;
+                item.span = 1;
 
                 var _depth = depth-level;
                 if(_depth !== 1){
