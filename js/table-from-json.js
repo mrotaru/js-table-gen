@@ -17,6 +17,9 @@
         var self = this;
 
         var pathComponents = path.split('/');
+        if(pathComponents[0] === ""){
+            pathComponents.splice(0,1);
+        }
         var firstPathComponent = pathComponents[0];
         var lastPathComponent  = pathComponents[pathComponents.length-1];
 

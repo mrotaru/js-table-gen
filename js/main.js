@@ -28,7 +28,7 @@ $( document ).ready(function() {
                 var rowspan = prop.hasOwnProperty('depth') ? prop.depth.toString() : "1";
                 var name = prop.name.charAt(0).toUpperCase() + prop.name.slice(1);
                 var str = '<th colspan="' + colspan + '" rowspan="' + rowspan + '">' + name + '</th>';
-                console.log(str);
+//                console.log(str);
                 $tr.append(str);
             }
 
@@ -41,30 +41,34 @@ $( document ).ready(function() {
     var $table = $('<table class="table"></table>');
     $table.append(buildHeader(layeredXProps));
 
+    function buildRow(item, xprops){
+        var $tr = $('<tr></tr>');
+
+        function val(obj, xprop) {
+            if(!xprop.hasOwnProperty('properties')){
+                var propVal = tableGenerator.search(obj, xprop.path);
+                $tr.append( '<td>' + (propVal != null ? propVal : "") + '</td>' );
+            } else {
+                for (var i=0; i < xprop.properties.length; ++i) {
+                    val(obj,xprop.properties[i]);
+                }
+            }
+        }
+
+        _(xprops).each(function(xprop){
+            val(item, xprop);
+        });
+
+        return $tr;
+    }
+
 
     var $tbody = $('<tbody></tbody>');
+
     // each item
-//    _(data).each(function(item){
-//        $tr = $('<tr></tr>');
-//        // each property
-//        _(xprops).each(function(xprop){
-//            if(!xprop.hasOwnProperty('properties')){
-
-//            } else {
-
-//            }
-
-//            if(typeof(prop) === 'string'){
-//                $tr.append( '<td>' + item[prop] + '</td>' );
-//            } else {
-//                var mPropName = Object.keys(prop)[0];
-//                _(prop[mPropName]).each(function(nestedProp){
-//                    $tr.append( '<td>' + item[mPropName][nestedProp] + '</td>' );
-//                });
-//            }
-//        });
-//        $tbody.append($tr);
-//    });
+    _(data).each(function(item){
+        $tbody.append(buildRow(item, xprops));
+    });
     $table.append($tbody);
 
     // insert table into dom
