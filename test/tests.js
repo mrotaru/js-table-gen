@@ -67,22 +67,22 @@ describe("TableGenerator.search()", function() {
     }); 
 });
 
-describe("TableGenerator.hasXProp()", function() {
+describe("TableGenerator.findXProp()", function() {
 
-    it("should return true if xprop list has property (1 level deep)", function() {
-        expect(testTableGenerator.hasXProp(
+    it("should find xprop if xprop list has property (1 level deep)", function() {
+        expect(testTableGenerator.findXProp(
             [ {name: 'foo'} ],
             'foo'
-        )).to.be.true;
+        )).to.deep.equal({name: 'foo'})
     });
     it("should return false if xprop list doesn't have property (1 level deep)", function() {
-        expect(testTableGenerator.hasXProp(
+        expect(testTableGenerator.findXProp(
             [ {name: 'foo'} ],
             'bar'
         )).to.be.false;
     });
-    it("should return true if xprop list has property (2 levels deep)", function() {
-        expect(testTableGenerator.hasXProp(
+    it("should find xprop if xprop list has property (2 levels deep)", function() {
+        expect(testTableGenerator.findXProp(
             [
                 {
                     name: 'foo', properties: [
@@ -91,10 +91,10 @@ describe("TableGenerator.hasXProp()", function() {
                 }
             ],
             'foo/bar'
-        )).to.be.true;
+        )).to.deep.equal({name: 'bar'});
     });
-    it("should return true if xprop list has property (3 levels deep)", function() {
-        expect(testTableGenerator.hasXProp(
+    it("should find xprop if xprop list has property (3 levels deep)", function() {
+        expect(testTableGenerator.findXProp(
             [
                 {
                     name: 'foo', properties: [
@@ -109,10 +109,10 @@ describe("TableGenerator.hasXProp()", function() {
                 }
             ],
             'foo/bar/baz'
-        )).to.be.true;
+        )).to.deep.equal({name: 'baz'});
     });
     it("should return false if xprop list doesn't have property (3 levels deep)", function() {
-        expect(testTableGenerator.hasXProp(
+        expect(testTableGenerator.findXProp(
             [
                 {
                     name: 'foo', properties: [

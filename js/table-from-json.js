@@ -1,7 +1,13 @@
 (function() {
     var root = this;
 
-    var TableGenerator = function(){
+    var TableGenerator = function(config){
+        var self = this;
+
+        self.config = config || {};
+
+        if(self.config.hasOwnProperty('flatten')){
+        }
     }
 
     /**
@@ -9,9 +15,9 @@
      *
      * Example:
      * 
-     * search({foo: 'bar'}, 'foo') returns 'bar'
-     * search({foo: 'bar'}, 'nope') returns null
-     * search({foo: {bar: 'baz'}}, 'foo/bar') returns 'baz'
+     * search({foo: 'bar'}, '/foo') returns 'bar'
+     * search({foo: 'bar'}, '/nope') returns null
+     * search({foo: {bar: 'baz'}}, '/foo/bar') returns 'baz'
      */
     TableGenerator.prototype.search = function(obj,path){
         var self = this;
@@ -38,6 +44,40 @@
 
 
     /**
+     * Combine all sub-xprops of an xprop
+     *
+     * When the table is generated, by default, the first non-null value will
+     * be used. If multiple such values exist, a warning should be shown.
+     *
+     * @example
+     * flatten({name: 'foo', path: '/foo', properties: [{name: 'bar', path: '/foo/bar' }] }, '/foo')
+     * -> {name: 'foo', path: '/foo', flattened: ['/foo/bar']}
+     *
+     * @example (paths omitted)
+     * flatten({name: 'foo', properties: [{name: 'bar'}, {name: 'baz'}] }, '/foo')
+     * -> {name: 'foo', path: '/foo', flattened: ['/foo/bar', '/foo/baz']}
+     */
+    TableGenerator.prototype.flatten = function(xprops, path, flattenner){
+        var self = this;
+
+        // find it
+        var xprop = null;
+        var pathComponents = path.split('/');
+        if(pathComponents[0] === ""){
+            pathComponents.splice(0,1);
+        }
+        var firstPathComponent = pathComponents[0];
+        var lastPathComponent  = pathComponents[pathComponents.length-1];
+        for (var i=0; i < xprops.length; ++i) {
+        }
+
+        // iterate over xprops, and add their paths to 'fattened' array
+
+
+    }
+
+
+    /**
      * Similar to `search`, it takes a `path` and object as input.
      * But the object is an array, each element being an object with:
      *  - `name` {string} name of the property (mandatory)
@@ -50,15 +90,15 @@
      *      {name: "bar", properties: [ {name: "p1"} ]
      *  ]
      *
-     *  hasXProp(xprops, "/foo")          -> true
-     *  hasXProp(xprops, "/foo/p1")       -> false
-     *  hasXProp(xprops, "/bar")          -> true
-     *  hasXProp(xprops, "/bar/p1")       -> true
+     *  findXProp(xprops, "/foo")          -> true
+     *  findXProp(xprops, "/foo/p1")       -> false
+     *  findXProp(xprops, "/bar")          -> true
+     *  findXProp(xprops, "/bar/p1")       -> true
      *
      *  @returns true if `path` is already in `xprops`
      *
      */
-    TableGenerator.prototype.hasXProp = function(xprops, path){
+    TableGenerator.prototype.findXProp = function(xprops, path){
         var self = this;
 
         var pathComponents = path.split('/');
@@ -69,14 +109,14 @@
         for (var i=0; i < xprops.length; ++i) {
             if(xprops[i].name === firstPathComponent){
                 if(pathComponents.length === 1) {
-                    return true;
+                    return xprops[i];
                 } else {
                     if(!xprops[i].hasOwnProperty("properties")){
                         return false;
                     } else {
                         pathComponents.splice(0,1);
                         var newPath = pathComponents.join('/');
-                        return self.hasXProp(xprops[i].properties, newPath);
+                        return self.findXProp(xprops[i].properties, newPath);
                     }
                 }
             }
@@ -145,7 +185,7 @@
                     if(!xprops[i].hasOwnProperty("properties")){
                         xprops[i].properties = [];
                     }
-                    if(!self.hasXProp(xprops[i].properties, pathComponents[1])) {
+                    if(!self.findXProp(xprops[i].properties, pathComponents[1])) {
                         xprops[i].properties.push({name: pathComponents[1]});
                     }
                 }
