@@ -67,6 +67,38 @@ describe("TableGenerator.search()", function() {
     }); 
 });
 
+describe("TableGenerator.eachXProp()", function() {
+    it("should iterate over all sub-properties", function() {
+        var xprops = [];
+        testTableGenerator.eachXProp(
+            {name: 'foo', properties: [{name: 'bar'}] },
+            function(xprop){
+                xprops.push(xprop);
+            }
+        );
+        expect(xprops).to.deep.equal([{name: 'bar'}]);
+    });
+    it("should iterate over all sub-properties - 2 xprops, siblings", function() {
+        var xprops = [];
+        testTableGenerator.eachXProp(
+            {name: 'foo', properties: [{name: 'bar'}, {name: 'baz'}] },
+            function(xprop){
+                xprops.push(xprop);
+            }
+        );
+        expect(xprops).to.deep.equal([{name: 'bar'},{name: 'baz'}]);
+    });
+    it("should iterate over all sub-properties - 2 xprops, nested", function() {
+        var xprops = [];
+        testTableGenerator.eachXProp(
+            {name: 'foo', properties: [{name: 'bar'}, {name: 'baz', properties: [{name: 'bez'}] }] },
+            function(xprop){
+                xprops.push(xprop);
+            }
+        );
+        expect(xprops).to.deep.equal([{name: 'bar'},{name: 'bez'}]);
+    });
+});
 describe("TableGenerator.findXProp()", function() {
 
     it("should find xprop if xprop list has property (1 level deep)", function() {

@@ -43,6 +43,21 @@
     }
 
 
+    /*
+     * Call a callback function with each sub-property of `xprop`
+     */
+    TableGenerator.prototype.eachXProp = function(xprop, callback){
+        var self = this;
+        if(xprop.hasOwnProperty('properties')){
+            for (var i=0; i < xprop.properties.length; ++i) {
+                self.eachXProp(xprop.properties[i], callback);
+            }
+        } else {
+            callback(xprop);
+        }
+    }
+
+
     /**
      * Combine all sub-xprops of an xprop
      *
@@ -61,14 +76,9 @@
         var self = this;
 
         // find it
-        var xprop = null;
-        var pathComponents = path.split('/');
-        if(pathComponents[0] === ""){
-            pathComponents.splice(0,1);
-        }
-        var firstPathComponent = pathComponents[0];
-        var lastPathComponent  = pathComponents[pathComponents.length-1];
-        for (var i=0; i < xprops.length; ++i) {
+        var xprop = self.findXProp(path);
+        if(!xprop) {
+            return;
         }
 
         // iterate over xprops, and add their paths to 'fattened' array
