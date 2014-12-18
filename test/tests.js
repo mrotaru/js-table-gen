@@ -380,6 +380,16 @@ describe("TableGenerator.getSpan()", function() {
     });
 });
 
+describe("TableGenerator.flatten()", function() {
+    it("should gather paths", function() {
+        var obj = {name: 'foo', path: '/foo', properties: [{name: 'bar', path: '/foo/bar'},{name: 'baz', path: '/foo/baz'}] };
+        var result = testTableGenerator.flatten(obj, '/foo');
+        var expected = {name: 'foo', path: '/foo', flattened: ['/foo/bar', '/foo/baz']};
+    });
+});
+
+
+
 describe("TableGenerator.layerXProps()", function() {
     it("should work for basic case", function() {
         var res = testTableGenerator.layerXProps(

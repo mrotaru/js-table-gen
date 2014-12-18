@@ -72,18 +72,24 @@
      * flatten({name: 'foo', properties: [{name: 'bar'}, {name: 'baz'}] }, '/foo')
      * -> {name: 'foo', path: '/foo', flattened: ['/foo/bar', '/foo/baz']}
      */
-    TableGenerator.prototype.flatten = function(xprops, path, flattenner){
+    TableGenerator.prototype.flatten = function(xprop, path, flattenner){
         var self = this;
 
         // find it
-        var xprop = self.findXProp(path);
+        var xprop = self.findXProp(xprop, path);
         if(!xprop) {
             return;
         }
 
         // iterate over xprops, and add their paths to 'fattened' array
+        var paths = [];
+        self.eachXProp(xprop, function(xprop){
+            paths.push(xprop.path);
+        });
 
-
+        delete xprop.properties;
+        xprop.flattened = paths;
+        return xprop;
     }
 
 
