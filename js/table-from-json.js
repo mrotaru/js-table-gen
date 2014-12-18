@@ -502,6 +502,20 @@
         return $thead;
     }
 
+    /**
+     * Flattening strategy - return first existing property.
+     */
+   TableGenerator.prototype.flattener = function(obj, flattenedProps){
+       var self = this;
+       for (var i=0; i < flattenedProps.length; ++i) {
+           var propVal = self.search(obj, flattenedProps[i]);
+           if(propVal) {
+               return propVal;
+           }
+       }
+       return "";
+   }
+
     // build a table row
     TableGenerator.prototype.buildRow = function(item, xprops){
         var self = this;
@@ -510,8 +524,13 @@
 
         function val(obj, xprop) {
             if(!xprop.hasOwnProperty('properties')){
-                var propVal = self.search(obj, xprop.path);
-                $tr.append( '<td title="' + xprop.path +'">' + (propVal != null ? propVal : "") + '</td>' );
+                if(xprop.hasOwnProperty('flattened')){
+                    var propVal = self.flattener(obj, xprop.flattened);
+                    $tr.append( '<td title="' + xprop.path +'">' + (propVal != null ? propVal : "") + '</td>' );
+                } else {
+                    var propVal = self.search(obj, xprop.path);
+                    $tr.append( '<td title="' + xprop.path +'">' + (propVal != null ? propVal : "") + '</td>' );
+                }
             } else {
                 for (var i=0; i < xprop.properties.length; ++i) {
                     val(obj,xprop.properties[i]);
@@ -538,8 +557,6 @@
             xprops = self.extractXProps(data[i],xprops);
         }
 
-        var layeredXProps = self.layerXProps(xprops);
-
         // flattening
         var config = self.config;
         if(config.hasOwnProperty('flatten')){
@@ -562,7 +579,7 @@
             }
         }
 
-        console.log('after flattening',xprops);
+        var layeredXProps = self.layerXProps(xprops);
 
         var $table = $('<table class="table"></table>');
         $table.append(self.buildHeader(layeredXProps));
