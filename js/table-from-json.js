@@ -6,8 +6,6 @@
 
         self.config = config || {};
 
-        if(self.config.hasOwnProperty('flatten')){
-        }
     }
 
     /**
@@ -22,6 +20,7 @@
     TableGenerator.prototype.search = function(obj,path){
         var self = this;
 
+        var path = path || "";
         var pathComponents = path.split('/');
         if(pathComponents[0] === ""){
             pathComponents.splice(0,1);
@@ -78,7 +77,7 @@
         // find it
         var xprop = self.findXProp(xprop, path);
         if(!xprop) {
-            return;
+            return false;
         }
 
         // iterate over xprops, and add their paths to 'fattened' array
@@ -87,8 +86,8 @@
             paths.push(xprop.path);
         });
 
-        delete xprop.properties;
         xprop.flattened = paths;
+        delete xprop.properties;
         return xprop;
     }
 
@@ -106,10 +105,10 @@
      *      {name: "bar", properties: [ {name: "p1"} ]
      *  ]
      *
-     *  findXProp(xprops, "/foo")          -> true
-     *  findXProp(xprops, "/foo/p1")       -> false
-     *  findXProp(xprops, "/bar")          -> true
-     *  findXProp(xprops, "/bar/p1")       -> true
+     *  (xprops, "/foo")          -> true
+     *  (xprops, "/foo/p1")       -> false
+     *  (xprops, "/bar")          -> true
+     *  (xprops, "/bar/p1")       -> true
      *
      *  @returns true if `path` is already in `xprops`
      *
@@ -117,7 +116,14 @@
     TableGenerator.prototype.findXProp = function(xprops, path){
         var self = this;
 
+        if(xprops.constructor !== Array){
+            xprops = [xprops];
+        }
+
         var pathComponents = path.split('/');
+        if(pathComponents[0] === ""){
+            pathComponents.splice(0,1);
+        }
         var firstPathComponent = pathComponents[0];
 
         var found = false;
@@ -191,6 +197,9 @@
         var self = this;
 
         var pathComponents = path.split('/');
+        if(pathComponents[0] === ""){
+            pathComponents.splice(0,1);
+        }
         var firstPathComponent = pathComponents[0];
 
         var found = false;
@@ -530,6 +539,31 @@
         }
 
         var layeredXProps = self.layerXProps(xprops);
+
+        // flattening
+        var config = self.config;
+        if(config.hasOwnProperty('flatten')){
+            for (var i=0; i < xprops.length; ++i) {
+                if(xprops[i].hasOwnProperty('properties')) {
+                    if(config.flatten.constructor === Array) {
+                        // check if any of the flattening paths match current xprop
+                        for (var j=0; j < config.flatten.length; ++j) {
+                            console.log('searching',xprops[i], config.flatten[j]);
+                            var foundXProp = self.findXProp(xprops[i], config.flatten[j]);
+                            if(foundXProp) {
+                                var parent = xprops[i];
+                                foundXProp = self.flatten(xprops[i], config.flatten[j]);
+                            }
+                        }
+                    } else {
+                        xprops[i] = self.flatten(xprops[i], config.flatten);
+                    }
+                }
+            }
+        }
+
+        console.log('after flattening',xprops);
+
         var $table = $('<table class="table"></table>');
         $table.append(self.buildHeader(layeredXProps));
 
