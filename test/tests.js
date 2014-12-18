@@ -382,9 +382,41 @@ describe("TableGenerator.getSpan()", function() {
 
 describe("TableGenerator.flatten()", function() {
     it("should gather paths", function() {
-        var obj = {name: 'foo', path: '/foo', properties: [{name: 'bar', path: '/foo/bar'},{name: 'baz', path: '/foo/baz'}] };
+        var obj =
+             {
+                name: 'foo',
+                path: '/foo',
+                properties: [{
+                    name: 'bar',
+                    path: '/foo/bar'
+                }, {
+                    name: 'baz',
+                    path: '/foo/baz'
+                }]
+            };
         var result = testTableGenerator.flatten(obj, '/foo');
         var expected = {name: 'foo', path: '/foo', flattened: ['/foo/bar', '/foo/baz']};
+        console.log(result);
+        console.log(expect);
+        expect(result).to.deep.equal(expected);
+    });
+    it("should only flatten when path matches exactly", function() {
+        var obj =
+             {
+                name: 'foo',
+                path: '/foo',
+                properties: [{
+                    name: 'bar',
+                    path: '/foo/bar',
+                    properties: [{
+                        name: 'bez',
+                        path: '/foo/bar/bez',
+                    }]
+                }]
+            };
+        var result = testTableGenerator.flatten(obj, ['/foo/bar']);
+        var expected = {name: 'foo', path: '/foo', flattened: ['/foo/bar', '/foo/baz']};
+        expect(result).to.deep.equal(expected);
     });
 });
 
