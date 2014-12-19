@@ -77,6 +77,7 @@
         // find it
         var xprop = self.findXProp(xprop, path);
         if(!xprop) {
+            console.log('did not find', path, 'in', xprop);
             return false;
         }
 
@@ -120,7 +121,11 @@
             xprops = [xprops];
         }
 
-        var pathComponents = path.split('/');
+        if(typeof path !== 'string') {
+            throw new Error("`path` must be a string")
+        }
+        pathComponents = path.split('/');
+
         if(pathComponents[0] === ""){
             pathComponents.splice(0,1);
         }
@@ -591,7 +596,7 @@
         // flattening
         var config = self.config;
         if(config.hasOwnProperty('flatten')){
-            for (var i=0; i < xprops.length; ++i) {
+            for (var i = 0; i < xprops.length; ++i) {
 
                 // it only makes sense to flatten a property which has other
                 // nested properties
@@ -606,6 +611,7 @@
                             var foundXProp = self.findXProp(xprops[i], config.flatten[j]);
                             if(foundXProp) {
                                 var parent = xprops[i];
+                                foundXProp = self.flatten(xprops[i], config.flatten[j]);
                             }
                         }
                     } else {

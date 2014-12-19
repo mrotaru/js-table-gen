@@ -400,22 +400,22 @@ describe("TableGenerator.flatten()", function() {
         console.log(expect);
         expect(result).to.deep.equal(expected);
     });
-    it("should only flatten when path matches exactly", function() {
+    it("should only flatten xprop that is a child, and has children", function() {
         var obj =
              {
-                name: 'foo',
-                path: '/foo',
-                properties: [{
-                    name: 'bar',
-                    path: '/foo/bar',
-                    properties: [{
-                        name: 'bez',
-                        path: '/foo/bar/bez',
-                    }]
-                }]
-            };
-        var result = testTableGenerator.flatten(obj, ['/foo/bar']);
-        var expected = {name: 'foo', path: '/foo', flattened: ['/foo/bar', '/foo/baz']};
+                 name: 'foo',
+                 path: '/foo',
+                 properties: [{
+                     name: 'bar',
+                     path: '/foo/bar',
+                     properties: [{
+                         name: 'bez',
+                         path: '/foo/bar/bez',
+                     }]
+                 }]
+             };
+        var result = testTableGenerator.flatten(obj, '/foo/bar');
+        var expected = {name: 'bar', path: '/foo/bar', flattened: ['/foo/bar/bez']};
         expect(result).to.deep.equal(expected);
     });
 });
