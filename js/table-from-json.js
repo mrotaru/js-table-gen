@@ -503,7 +503,12 @@
     }
 
     /**
-     * Flattening strategy - return first existing property.
+     * Flattening strategy - check the object for properties in `flattenedProps`
+     * until one is found, in which case it's value is returned. If none of the
+     * properties is found on the object, then an empty string is returned.
+     *
+     * @param {Object} obj - Object which will be checked for properties
+     * @param {Array} flattenedProps - Array of paths
      */
    TableGenerator.prototype.flattener = function(obj, flattenedProps){
        var self = this;
@@ -516,35 +521,57 @@
        return "";
    }
 
-    // build a table row
-    TableGenerator.prototype.buildRow = function(item, xprops){
+    /** 
+     * Build a table row from an object
+     *
+     * @param {Object} obj
+     * @param {Array} xprops
+     */
+    TableGenerator.prototype.buildRow = function(obj, xprops){
         var self = this;
 
         var $tr = $('<tr></tr>');
 
+        /** Extract value corresponding to `xprop` from `obj` */
         function val(obj, xprop) {
+
+            /** Check if `xprop` is an edge - ie, it has no nested xprops */
             if(!xprop.hasOwnProperty('properties')){
                 if(xprop.hasOwnProperty('flattened')){
+                    /** Flattened xprop, so it has a property, `flattened` - which is an array of paths
+                      * that were flattened. So we need to call the flattening strategy function. By default,
+                      * `self.flattner` is used - it will return the first non-null value.
+                      */
                     var propVal = self.flattener(obj, xprop.flattened);
                     $tr.append( '<td title="' + xprop.path +'">' + (propVal != null ? propVal : "") + '</td>' );
                 } else {
+                    /** Not flattened - so `obj` must have a property as described by `xprop.path` */
                     var propVal = self.search(obj, xprop.path);
                     $tr.append( '<td title="' + xprop.path +'">' + (propVal != null ? propVal : "") + '</td>' );
                 }
             } else {
+                /** Not an edge. Simply recurse for each nested xprop. */
                 for (var i=0; i < xprop.properties.length; ++i) {
                     val(obj,xprop.properties[i]);
                 }
             }
         }
 
+        /** for each xprop, add the corresponding value to the table row */
         for (var i=0; i < xprops.length; ++i) {
-            val(item, xprops[i]);
+            val(obj, xprops[i]);
         }
 
         return $tr;
     }
 
+    /**
+     * Build a table from an array of objects.
+     * 
+     * @param {Array} data - Array of objects. Each object will
+     *                       form a row in the table.
+     * @returns the generated table
+     */
     TableGenerator.prototype.makeTable = function(data){
         var self = this;
 
@@ -552,6 +579,10 @@
             return;
         }
 
+        // go through all data items, and build the tree of all possible
+        // properties. It's represented as an array, each top-level property
+        // being represented by an element in this array. Each such element
+        // can have a `properties` property, describing nested properties.
         var xprops = [];
         for (var i=0; i < data.length; ++i) {
             xprops = self.extractXProps(data[i],xprops);
@@ -561,15 +592,20 @@
         var config = self.config;
         if(config.hasOwnProperty('flatten')){
             for (var i=0; i < xprops.length; ++i) {
+
+                // it only makes sense to flatten a property which has other
+                // nested properties
                 if(xprops[i].hasOwnProperty('properties')) {
+
+                    // config.flatten can be string representing the path to the
+                    // property to be flattened, or an array of such strings.
                     if(config.flatten.constructor === Array) {
+
                         // check if any of the flattening paths match current xprop
                         for (var j=0; j < config.flatten.length; ++j) {
-                            console.log('searching',xprops[i], config.flatten[j]);
                             var foundXProp = self.findXProp(xprops[i], config.flatten[j]);
                             if(foundXProp) {
                                 var parent = xprops[i];
-                                foundXProp = self.flatten(xprops[i], config.flatten[j]);
                             }
                         }
                     } else {
