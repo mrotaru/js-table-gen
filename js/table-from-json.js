@@ -5,17 +5,21 @@
         var self = this;
 
         self.config = config || {};
-
     }
 
     /**
-     * Return value at `path` in `obj`.
+     * Return value at `path` in `obj`. It can be an object, or
+     * a primitive value. If `path` is not found, then `null` is
+     * returned.
      *
-     * Example:
-     * 
+     * @examples
      * search({foo: 'bar'}, '/foo') returns 'bar'
      * search({foo: 'bar'}, '/nope') returns null
      * search({foo: {bar: 'baz'}}, '/foo/bar') returns 'baz'
+     *
+     * @param {Object} obj
+     * @param {String} path
+     * @return {Object|null}
      */
     TableGenerator.prototype.search = function(obj,path){
         var self = this;
@@ -43,7 +47,11 @@
 
 
     /*
-     * Call a callback function with each sub-property of `xprop`
+     * Iterate over all nested xpops of an xprop, and Call a callback
+     * function with each of them.
+     * 
+     * @param {XProp} xprop
+     * @param {Function} callback
      */
     TableGenerator.prototype.eachXProp = function(xprop, callback){
         var self = this;
@@ -58,20 +66,26 @@
 
 
     /**
-     * Combine all sub-xprops of an xprop
+     * Combine all sub-xprops of an xprop. Note that all sub-xprops will be
+     * combined, not only those one level down.
      *
-     * When the table is generated, by default, the first non-null value will
-     * be used. If multiple such values exist, a warning should be shown.
+     * A new property is set on the XProp, `flattened` - an array where each
+     * element is the path of a combined XProp. After all paths are pushed to
+     * `flattened`, the `properties` property is deleted.
      *
      * @example
      * flatten({name: 'foo', path: '/foo', properties: [{name: 'bar', path: '/foo/bar' }] }, '/foo')
-     * -> {name: 'foo', path: '/foo', flattened: ['/foo/bar']}
+     * => {name: 'foo', path: '/foo', flattened: ['/foo/bar']}
      *
      * @example (paths omitted)
      * flatten({name: 'foo', properties: [{name: 'bar'}, {name: 'baz'}] }, '/foo')
-     * -> {name: 'foo', path: '/foo', flattened: ['/foo/bar', '/foo/baz']}
+     * => {name: 'foo', path: '/foo', flattened: ['/foo/bar', '/foo/baz']}
+     *
+     * @param {XProp} xprop
+     * @param {String} path
+     * @return {XProp} with the `flattened` property set and `properties` property removed
      */
-    TableGenerator.prototype.flatten = function(xprop, path, flattenner){
+    TableGenerator.prototype.flatten = function(xprop, path){
         var self = this;
 
         // find it
@@ -111,8 +125,9 @@
      *  (xprops, "/bar")          -> true
      *  (xprops, "/bar/p1")       -> true
      *
-     *  @returns true if `path` is already in `xprops`
-     *
+     *  @param {XProp[]} xprops
+     *  @param {String} path
+     *  @returns {XProp|false}
      */
     TableGenerator.prototype.findXProp = function(xprops, path){
         var self = this;
@@ -121,11 +136,11 @@
             xprops = [xprops];
         }
 
+        /** parse path */
         if(typeof path !== 'string') {
             throw new Error("`path` must be a string")
         }
         pathComponents = path.split('/');
-
         if(pathComponents[0] === ""){
             pathComponents.splice(0,1);
         }
@@ -135,12 +150,17 @@
 
         for (var i=0; i < xprops.length; ++i) {
             if(xprops[i].name === firstPathComponent){
+                // if we only have one path component, `obj` should have a property
+                // with the same name
                 if(pathComponents.length === 1) {
                     return xprops[i];
                 } else {
+                    // we have multiple path components. But the xprop might disagree,
+                    // by not having nested xprops. In that case, return false.
                     if(!xprops[i].hasOwnProperty("properties")){
                         return false;
                     } else {
+                        // multiple patch components, and nested xprops - we need to recurse.
                         pathComponents.splice(0,1);
                         var newPath = pathComponents.join('/');
                         return self.findXProp(xprops[i].properties, newPath);
@@ -155,6 +175,9 @@
     /**
      * If `obj` matches the structure described by `xprop`, return an array with each
      * property value extracted (or null, if object doesn't have it) and `path`.
+     *
+     * @param {XProp} xprop
+     * @param {Object} obj
      */
     function xpropVals(xprop, obj){
         var self = this;
@@ -196,6 +219,8 @@
     /**
      * See test/tests.js for examples
      *
+     * @param {XProp[]} xprop
+     * @param {String} path
      * @returns {Array} of new x-properties
      */
     TableGenerator.prototype.addXProp = function(xprops, path){
@@ -371,19 +396,20 @@
     }
 
     /**
-     * Calculate total number of "leaves" of the xprop tree. This is needed to
-     * know the number of columns a table header should span.
+     * Calculate total number of "leaves" or "edges" of the xprop
+     * tree. This is needed to know the number of columns a table header
+     * should span.
      *
-     * In: {name: 'foo'} 
-     * Out: 1
+     * @examples
+     * getSpan({name: 'foo'})
+     * => 1
+     * getSpan({name: 'foo', properties: [{name: 'bar'}]})
+     * => 1
+     * getSpan({name: 'foo', properties: [{name: 'bar'}, {name: 'baz'}]})
+     * => 2
      *
-     * In: {name: 'foo', properties: [{name: 'bar'}] } 
-     * Out: 1
-     *
-     * In: {name: 'foo', properties: [{name: 'bar'}, {name: 'baz'}] } 
-     * Out: 2
-     *
-     * More examples in test suite
+     * @param {XProp} xprop
+     * @returns {Number} number of colums `xprop` will span
      */
     TableGenerator.prototype.getSpan = function(xprop){
         var self = this;
@@ -402,6 +428,10 @@
     /**
      * Calculate the depth of a xprop. That is, how many levels do it's
      * nested xprops extend.
+     *
+     * @param {XProp} xprop
+     * @param {Number} currentLevel - When recursing, we need to know the level we're on
+     * @returns {Number} maximum depth
      */
     TableGenerator.prototype.getDepth = function(xprop, currentLevel){
         var self = this;
@@ -434,6 +464,8 @@
      * each element must be an object with one mandatory property: `name` and can
      * also have a `span` and `depth` (colspan and rowspan).
      * 
+     * @param {XProp[]} xprops
+     * @returns {XProp[]} Each item is a row, containging an array of columns 
      */
     TableGenerator.prototype.layerXProps = function(xprops){
         var self = this;
@@ -448,29 +480,40 @@
            }
         }
 
+        /**
+         * Helper function - will go through all nested xprops of the `xprop`
+         * param, and place them on the appropriate level in `ret`.
+         */
         function layerXProp(xprop, level){
 
+            // we might need to add a new level
             if(ret[level] === undefined){
                 ret.push([]);
             }
 
             if(xprop.hasOwnProperty('properties')){
 
+                // 1. add an xprop representing the xprop itself
                 ret[level].push({name: xprop.name, path: xprop.path, span: self.getSpan(xprop)});
 
+                // 2. recurse for each nested xprop, increasing the level
+                ret[level].push({name: xprop.name, path: xprop.path, span: self.getSpan(xprop)});
                 for (var i=0; i < xprop.properties.length; ++i) {
                     layerXProp(xprop.properties[i], level+1);
                 }
             } else {
 
+                // no nested xprops, this is an edge. So it is added to the current
+                // level. First, copy it's name and path
                 var item = {};
                 if(xprop.name){
                     item.name = xprop.name;
                 }
-
                 item.path = xprop.path;
-                item.span = 1;
 
+                // then, add a span of 1 (because no nested xprops) and the depth
+                // obtained by substracting `level` from `depth`
+                item.span = 1;
                 var _depth = depth-level;
                 if(_depth !== 1){
                     item.depth = _depth;
@@ -507,14 +550,14 @@
         return $thead;
     }
 
-    /**
-     * Flattening strategy - check the object for properties in `flattenedProps`
-     * until one is found, in which case it's value is returned. If none of the
-     * properties is found on the object, then an empty string is returned.
-     *
-     * @param {Object} obj - Object which will be checked for properties
-     * @param {Array} flattenedProps - Array of paths
-     */
+   /**
+    * Flattening strategy - check the object for properties in `flattenedProps`
+    * until one is found, in which case it's value is returned. If none of the
+    * properties is found on the object, then an empty string is returned.
+    *
+    * @param {Object} obj - Object which will be checked for properties
+    * @param {Array} flattenedProps - Array of paths
+    */
    TableGenerator.prototype.flattener = function(obj, flattenedProps){
        var self = this;
        for (var i=0; i < flattenedProps.length; ++i) {
