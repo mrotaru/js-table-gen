@@ -140,7 +140,7 @@
         if(typeof path !== 'string') {
             throw new Error("`path` must be a string")
         }
-        pathComponents = path.split('/');
+        var pathComponents = path.split('/');
         if(pathComponents[0] === ""){
             pathComponents.splice(0,1);
         }
@@ -497,7 +497,6 @@
                 ret[level].push({name: xprop.name, path: xprop.path, span: self.getSpan(xprop)});
 
                 // 2. recurse for each nested xprop, increasing the level
-                ret[level].push({name: xprop.name, path: xprop.path, span: self.getSpan(xprop)});
                 for (var i=0; i < xprop.properties.length; ++i) {
                     layerXProp(xprop.properties[i], level+1);
                 }

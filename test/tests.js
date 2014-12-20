@@ -433,9 +433,14 @@ describe("TableGenerator.layerXProps()", function() {
 //        console.log(expectedRes);
         expect(res).to.deep.equal(expectedRes);
     });
-    it("should work with sub-properties", function() {
+    it("should work with sub-properties (1 level)", function() {
         var res = testTableGenerator.layerXProps(
-            [ {name: 'foo', path: '/foo', properties: [{name: 'bar', path: '/foo/bar'}, {name: 'baz', path: '/foo/baz'}] } ]
+            [{
+                name: 'foo', path: '/foo', properties: [{
+                    name: 'bar', path: '/foo/bar'
+                    }, {
+                    name: 'baz', path: '/foo/baz'}]
+            }]
         );
         var expectedRes =
             [ 
