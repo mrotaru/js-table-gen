@@ -317,23 +317,36 @@
     }
 
     /**
-     * Extract properties into `props`. So, `props` is an array, each element
-     * being an object with at least a `name` property. It can also have a 'properties'
-     * property. It does not care about values.
+     * Extract propertiy metadata from `item` into an array of xprops. Elements in
+     * the array represent the top-level xprops. Each of them can have nested xprops
+     * via the `properties` property.
      *
-     *  Input:
-     *  var item = {
+     * @example
+     * extractXProps(
+     *          {
      *              "foo": "asd",
      *              "bar": { "p1":  100 }
-     *             }
+     *          }
+     * )
+     * // => 
+     *   [
+     *     {
+     *       name: "foo"
+     *     },
+     *     {
+     *       name: "bar",
+     *       properties: [
+     *         {
+     *           name: "p1"
+     *         }
+     *       ]
+     *     }
+     *   ]
      *
-     *  Output:
-     *  [ 
-     *      {name: "foo"},
-     *      {name: "bar", properties: [ {name: "p1"} ]
-     *  ]
-     *
-     *
+     * @param {Object} item
+     * @param {XProp[]} [xprops]
+     * @param {String} [path]
+     * @returns {XProp[]} array of extracted xprops
      */
     TableGenerator.prototype.extractXProps = function(item, xprops, path){
         var self = this;
