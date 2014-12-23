@@ -169,49 +169,6 @@
         return found;
     }
 
-    /**
-     * If `obj` matches the structure described by `xprop`, return an array with each
-     * property value extracted (or null, if object doesn't have it) and `path`.
-     *
-     * @param {XProp} xprop
-     * @param {Object} obj
-     */
-    function xpropVals(xprop, obj){
-        var self = this;
-        res = [];
-
-
-        if(!xprop.hasOwnProperty('properties')){
-            res.path = path + '/' + xprop.name;
-            if(obj.hasOwnProperty(xprop.name)){
-                res.value = obj[xprop.name];
-            } else {
-                res.value = null;
-            }
-            return res;
-        } else {
-
-            function xpropsVals(xprops, obj, path) {
-                var path = path || '';
-
-                for (var i=0;i < xprops.length; ++i) {
-                    if(!xprops[i].hasOwnProperty('properties')){
-                        if(obj.hasOwnProperty(xprop.name)){
-                            res.value = obj[xprop.name];
-                        } else {
-                            res.value = null;
-                        }
-                        return res;
-                    }
-                }
-                if(!found){
-                    return null;
-                }
-            }
-            xpropsVals(xprop.properties, obj);
-        }
-    }
-
 
     /**
      * See test/tests.js for examples
