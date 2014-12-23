@@ -109,21 +109,18 @@
 
     /**
      * Similar to `search`, it takes a `path` and object as input.
-     * But the object is an array, each element being an object with:
-     *  - `name` {string} name of the property (mandatory)
-     *  - `properties` {array} nested properties (optional)
+     * But the object is an array, each element being an xprop.
      *
-     * An example illustrates much better:
-     *
+     *  @example
      *  extractedproperties = [ 
      *      {name: "foo"},
      *      {name: "bar", properties: [ {name: "p1"} ]
      *  ]
      *
-     *  (xprops, "/foo")          -> true
-     *  (xprops, "/foo/p1")       -> false
-     *  (xprops, "/bar")          -> true
-     *  (xprops, "/bar/p1")       -> true
+     *  findXProp(xprops, "/foo")          -> {name: "foo"}
+     *  findXProp(xprops, "/foo/p1")       -> false
+     *  findXProp(xprops, "/bar")          -> {name: "bar", properties: [ {name: "p1"}
+     *  findXProp(xprops, "/bar/p1")       -> {name: "p1"}
      *
      *  @param {XProp[]} xprops
      *  @param {String} path
@@ -221,7 +218,7 @@
      *
      * @param {XProp[]} xprop
      * @param {String} path
-     * @returns {Array} of new x-properties
+     * @returns {Array} of new xprops
      */
     TableGenerator.prototype.addXProp = function(xprops, path){
         var self = this;
@@ -267,15 +264,19 @@
     /**
      * Combine two xprops arrays
      *
-     * In:  [{name: 'foo'}], [{name: 'bar'}]
-     * Out: [{name: 'foo'}], [{name: 'bar'}]
+     * @example
+     * combineXProps([{name: 'foo'}], [{name: 'bar'}])
+     * => [{name: 'foo'}], [{name: 'bar'}]
      *
-     * In:  [{name: 'foo'}], [{name: 'foo', properties: [{name: 'bar'}] }]
-     * Out: [{name: 'foo', properties: [{name: 'bar'}] }]
+     * @example
+     * combineXProps([{name: 'foo'}], [{name: 'foo', properties: [{name: 'bar'}] }])
+     * => [{name: 'foo', properties: [{name: 'bar'}] }]
      *
-     * In:  [{name: 'foo', properties: [{name: 'bar'}] }], [{name: 'foo', properties: [{name: 'baz'}] }]
-     * Out: [{name: 'foo', properties: [{name: 'bar'}, {name: 'baz'}] }]
-     *
+     * @example
+     * combineXProps([{name: 'foo', properties: [{name: 'bar'}] }], [{name: 'foo', properties: [{name: 'baz'}] }])
+     * => [{name: 'foo', properties: [{name: 'bar'}, {name: 'baz'}] }]
+     * 
+     * @returns {XProp[]}
      */
     TableGenerator.prototype.combineXProps = function(xprops1, xprops2){
         var self = this;
